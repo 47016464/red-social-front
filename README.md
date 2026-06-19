@@ -37,7 +37,7 @@ Orbit es una red social desarrollada con Angular 17 como trabajo práctico de la
 
 ### Deploy
 La aplicación está deployada en Vercel:
-🔗 [https://TU_URL.vercel.app](https://TU_URL.vercel.app)
+🔗 (https://red-social-front-one.vercel.app/login)
 
 ### Ramas
 | Rama | Descripción |
