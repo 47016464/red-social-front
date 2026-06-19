@@ -1,0 +1,124 @@
+.feed-page { min-height: 100vh; background: transparent; position: relative; z-index: 1; }
+
+/* Topbar */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 58px;
+  background: rgba(5, 7, 15, 0.8);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.topbar-brand {
+  display: flex; align-items: center; gap: 0.6rem;
+  cursor: pointer; text-decoration: none;
+  font-weight: 800; font-size: 1.1rem;
+  background: linear-gradient(135deg, #fff, #b8b0ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.topbar-logo {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, #7c6ef7, #9c6ef7);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(124,110,247,0.4);
+}
+.topbar-actions { display: flex; align-items: center; gap: 0.5rem; }
+.topbar-link {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: #7a829e; text-decoration: none; font-size: 0.88rem;
+  font-weight: 500; padding: 0.4rem 0.8rem; border-radius: 8px;
+  transition: all 0.2s;
+}
+.topbar-link:hover, .topbar-link.active { color: #7c6ef7; background: rgba(124,110,247,0.1); }
+.topbar-logout {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: none; border: 1px solid rgba(255,255,255,0.08);
+  color: #7a829e; cursor: pointer; transition: all 0.2s; margin-left: 0.3rem;
+}
+.topbar-logout:hover { border-color: #e74c6c; color: #e74c6c; }
+
+/* Feed */
+.feed-body { max-width: 620px; margin: 0 auto; padding: 2rem 1rem; }
+.feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.feed-header h2 { font-size: 1.4rem; font-weight: 800; }
+.btn-new-post {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: linear-gradient(135deg, #7c6ef7, #9c6ef7);
+  color: white; border: none; border-radius: 20px;
+  padding: 0.5rem 1.2rem; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; box-shadow: 0 4px 15px rgba(124,110,247,0.35);
+  transition: all 0.2s;
+}
+.btn-new-post:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,110,247,0.5); }
+
+/* Post card */
+.post-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px; padding: 1.3rem 1.5rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.2s, transform 0.2s;
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.post-card:hover { border-color: rgba(124,110,247,0.25); }
+
+.post-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.post-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #7c6ef7, #38bdf8);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem; color: white;
+}
+.post-name { display: block; font-weight: 700; font-size: 0.95rem; }
+.post-meta { font-size: 0.78rem; color: #7a829e; }
+.post-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.post-text { color: #9098b1; font-size: 0.9rem; line-height: 1.6; margin: 0; }
+.post-img { width: 100%; border-radius: 12px; margin-top: 0.8rem; max-height: 320px; object-fit: cover; }
+
+.post-footer {
+  display: flex; gap: 0.5rem; margin-top: 1rem;
+  padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.action-btn {
+  display: flex; align-items: center; gap: 0.35rem;
+  background: none; border: none; color: #7a829e;
+  cursor: pointer; font-size: 0.88rem; padding: 0.4rem 0.8rem;
+  border-radius: 8px; transition: all 0.2s; font-weight: 500;
+}
+.action-btn:hover { background: rgba(124,110,247,0.1); color: #7c6ef7; }
+.action-btn.liked { color: #e74c6c; }
+.action-btn.liked:hover { background: rgba(231,76,108,0.1); }
+.action-btn.active-comments { color: #7c6ef7; background: rgba(124,110,247,0.1); }
+
+/* Comentarios */
+.comments-wrap {
+  margin-top: 0.8rem; padding-top: 0.8rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.comment { display: flex; gap: 0.6rem; margin-bottom: 0.7rem; }
+.comment-av {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(124,110,247,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: #7c6ef7;
+}
+.comment-body { display: flex; flex-direction: column; }
+.comment-name { font-size: 0.8rem; font-weight: 700; }
+.comment-text { font-size: 0.85rem; color: #9098b1; }
+.comment-time { font-size: 0.7rem; color: #5a6278; }
+.comment-input-row { display: flex; gap: 0.5rem; margin-top: 0.6rem; align-items: center; }
+.btn-send {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 8px; border: none;
+  background: linear-gradient(135deg, #7c6ef7, #9c6ef7);
+  color: white; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.btn-send:hover { transform: scale(1.05); }
+
+/* form-label dentro del modal */
+.form-label { color: #9098b1; font-size: 0.82rem; font-weight: 600; }

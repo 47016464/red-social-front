@@ -1,59 +1,50 @@
-# RedSocial
+# Orbit - Red Social 🚀
+### Trabajo Práctico N°2 - Programación IV
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+## Augusto Bottazzi
 
-## Development server
+## Descripción
+Orbit es una red social desarrollada con Angular 17 como trabajo práctico de la materia Programación IV. Permite a los usuarios registrarse, iniciar sesión, ver publicaciones y gestionar su perfil.
 
-To start a local development server, run:
+## Sprint 1 — Frontend
 
-```bash
-ng serve
-```
+### Tecnologías utilizadas
+- Angular 17 (Standalone Components)
+- TypeScript
+- Bootstrap 5
+- Lucide Angular (iconos)
+- Angular Signals
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Pantallas
+| Pantalla | Ruta | Descripción |
+|---|---|---|
+| Login | `/login` | Inicio de sesión por email o nombre de usuario |
+| Registro | `/registro` | Creación de cuenta con validaciones |
+| Publicaciones | `/publicaciones` | Feed principal con posts y comentarios |
+| Mi Perfil | `/mi-perfil` | Visualización y edición del perfil |
 
-## Code scaffolding
+### Funcionalidades implementadas
+- Formulario de login con validaciones (email/username, contraseña con mínimo 8 caracteres, una mayúscula y un número)
+- Formulario de registro con validaciones completas
+- Validación de edad mínima de 15 años en el registro
+- Campo de carga de imagen de perfil con preview
+- Atributo `perfil` con valor por defecto `usuario`
+- Navegación entre componentes con Angular Router
+- Diseño dark mode con estética espacial (estrellas animadas)
+- Modales de éxito en lugar de alerts
+- Favicon personalizado
+- Signals para manejo de estado reactivo
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Deploy
+La aplicación está deployada en Vercel:
+🔗 [https://TU_URL.vercel.app](https://TU_URL.vercel.app)
 
-```bash
-ng generate component component-name
-```
+### Ramas
+| Rama | Descripción |
+|---|---|
+| `main` | Versión deployada en producción |
+| `sprint-1` | Snapshot de entrega del Sprint 1 |
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Notas
+- En Sprint 1 el frontend trabaja con datos simulados (setTimeout). La conexión real con el backend se implementa en Sprint 2.
+- El perfil de Mi Perfil muestra datos placeholder hasta la integración con el backend en Sprint 2.

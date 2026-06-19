@@ -1,0 +1,68 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <lucide-icon [img]="Rocket" size="32" color="white"></lucide-icon>
+      </div>
+      <h1>Orbit</h1>
+      <p>Tu espacio en la galaxia social</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="mb-3">
+        <label class="form-label">CORREO O USUARIO</label>
+        <input
+          type="text"
+          class="form-control"
+          [class.is-invalid]="identifier.invalid && identifier.touched"
+          formControlName="identifier"
+          placeholder="tu@email.com o tu nombre de usuario"
+        />
+        <div class="invalid-feedback" *ngIf="identifier.touched">
+          <span *ngIf="identifier.errors?.['required']">El correo o usuario es obligatorio.</span>
+        </div>
+      </div>
+
+      <div class="mb-1">
+        <label class="form-label">CONTRASEÑA</label>
+        <div class="input-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [class.is-invalid]="password.invalid && password.touched"
+            formControlName="password"
+            placeholder="Tu contraseña"
+          />
+          <button class="btn btn-outline-secondary icon-btn" type="button" (click)="showPassword = !showPassword">
+            <lucide-icon [img]="showPassword ? EyeOff : Eye" size="16"></lucide-icon>
+          </button>
+        </div>
+        <div class="password-rules" *ngIf="password.touched || password.value">
+          <span class="rule-chip" [class.ok]="password.value?.length >= 8">✓ 8 caracteres</span>
+          <span class="rule-chip" [class.ok]="password.value && /[A-Z]/.test(password.value)">✓ Mayúscula</span>
+          <span class="rule-chip" [class.ok]="password.value && /\d/.test(password.value)">✓ Número</span>
+        </div>
+        <div class="invalid-feedback" *ngIf="password.invalid && password.touched">
+          <span *ngIf="password.errors?.['required']">La contraseña es obligatoria.</span>
+        </div>
+      </div>
+
+      <div class="alert alert-danger mt-3" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <button type="submit" class="btn btn-primary w-100 btn-submit mt-4" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+        <lucide-icon *ngIf="!loading" [img]="Rocket" size="16" class="me-2"></lucide-icon>
+        {{ loading ? 'Ingresando...' : 'Iniciar sesión' }}
+      </button>
+    </form>
+
+    <div class="auth-divider">o</div>
+
+    <div class="auth-footer">
+      ¿No tenés cuenta?
+      <a routerLink="/registro">Creá tu cuenta gratis</a>
+    </div>
+  </div>
+</div>

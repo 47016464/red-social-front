@@ -1,0 +1,129 @@
+<div class="profile-page">
+
+  <!-- Navbar -->
+  <nav class="topbar">
+    <div class="topbar-brand" routerLink="/publicaciones">
+      <div class="topbar-logo">
+        <lucide-icon [img]="Rocket" size="18" color="white"></lucide-icon>
+      </div>
+      <span>Orbit</span>
+    </div>
+    <div class="topbar-actions">
+      <a routerLink="/publicaciones" class="topbar-link">
+        <lucide-icon [img]="Home" size="18"></lucide-icon>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/mi-perfil" class="topbar-link active">
+        <lucide-icon [img]="User" size="18"></lucide-icon>
+        <span>Mi Perfil</span>
+      </a>
+      <button class="topbar-logout" (click)="logout()">
+        <lucide-icon [img]="LogOut" size="16"></lucide-icon>
+      </button>
+    </div>
+  </nav>
+
+  <div class="profile-body">
+
+    <!-- Banner + avatar -->
+    <div class="profile-banner">
+      <div class="banner-bg"></div>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" (click)="editMode && fileInput.click()">
+          <img *ngIf="user.avatar || previewUrl" [src]="previewUrl || user.avatar || ''" alt="avatar" />
+          <span *ngIf="!user.avatar && !previewUrl">{{ getInitials() }}</span>
+          <div class="avatar-edit-overlay" *ngIf="editMode">
+            <lucide-icon [img]="Camera" size="18" color="white"></lucide-icon>
+          </div>
+        </div>
+        <input #fileInput type="file" accept="image/*" hidden (change)="onFileChange($event)" />
+      </div>
+      <div class="profile-banner-info">
+        <h2>{{ user.nombre }} {{ user.apellido }}</h2>
+        <span class="username-tag">@{{ user.username }}</span>
+        <span class="role-badge" [class.admin]="user.perfil === 'administrador'">
+          <lucide-icon [img]="Shield" size="11"></lucide-icon>
+          {{ user.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}
+        </span>
+      </div>
+      <button class="btn-edit" *ngIf="!editMode" (click)="editMode = true">
+        <lucide-icon [img]="Edit" size="15"></lucide-icon>
+        Editar perfil
+      </button>
+    </div>
+
+    <!-- Descripción -->
+    <div class="profile-card" *ngIf="!editMode">
+      <p class="user-bio">{{ user.descripcion }}</p>
+    </div>
+
+    <!-- Info -->
+    <div class="profile-card" *ngIf="!editMode">
+      <div class="section-title">Información</div>
+      <div class="info-row">
+        <div class="info-icon"><lucide-icon [img]="Mail" size="15"></lucide-icon></div>
+        <div>
+          <div class="info-label">Correo</div>
+          <div class="info-value">{{ user.email }}</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><lucide-icon [img]="Calendar" size="15"></lucide-icon></div>
+        <div>
+          <div class="info-label">Nacimiento</div>
+          <div class="info-value">{{ user.fechaNacimiento }}</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon"><lucide-icon [img]="Shield" size="15"></lucide-icon></div>
+        <div>
+          <div class="info-label">Rol</div>
+          <div class="info-value">{{ user.perfil }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form edición -->
+    <div class="profile-card" *ngIf="editMode">
+      <div class="section-title">Editar perfil</div>
+      <form [formGroup]="form" novalidate>
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control"
+              [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched"
+              formControlName="nombre" />
+            <div class="invalid-feedback">Mínimo 2 caracteres.</div>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Apellido</label>
+            <input type="text" class="form-control"
+              [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched"
+              formControlName="apellido" />
+            <div class="invalid-feedback">Mínimo 2 caracteres.</div>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+          <div class="char-count">{{ f['descripcion'].value?.length || 0 }}/150</div>
+        </div>
+        <div class="edit-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="saveChanges()">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="successModal">
+  <div class="modal-box" style="text-align:center">
+    <div class="modal-icon success">✓</div>
+    <h3>Perfil actualizado</h3>
+    <p>Los cambios fueron guardados correctamente.</p>
+    <button class="btn btn-primary w-100" (click)="successModal = false">Aceptar</button>
+  </div>
+</div>

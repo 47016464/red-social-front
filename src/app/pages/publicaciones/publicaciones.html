@@ -1,0 +1,129 @@
+<div class="feed-page">
+
+  <!-- Navbar -->
+  <nav class="topbar">
+    <div class="topbar-brand" routerLink="/publicaciones">
+      <div class="topbar-logo">
+        <lucide-icon [img]="Rocket" size="18" color="white"></lucide-icon>
+      </div>
+      <span>Orbit</span>
+    </div>
+    <div class="topbar-actions">
+      <a routerLink="/publicaciones" class="topbar-link active">
+        <lucide-icon [img]="Home" size="18"></lucide-icon>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/mi-perfil" class="topbar-link">
+        <lucide-icon [img]="User" size="18"></lucide-icon>
+        <span>Mi Perfil</span>
+      </a>
+      <button class="topbar-logout" (click)="logout()">
+        <lucide-icon [img]="LogOut" size="16"></lucide-icon>
+      </button>
+    </div>
+  </nav>
+
+  <div class="feed-body">
+
+    <!-- Header -->
+    <div class="feed-header">
+      <h2>Inicio</h2>
+      <button class="btn-new-post" (click)="newPostModal = true">
+        <lucide-icon [img]="Plus" size="16"></lucide-icon>
+        Nueva publicación
+      </button>
+    </div>
+
+    <!-- Posts -->
+    <div class="post-card" *ngFor="let post of publicaciones">
+      <div class="post-head">
+        <div class="post-avatar">{{ getInitials(post.autor) }}</div>
+        <div class="post-author-info">
+          <span class="post-name">{{ post.autor }}</span>
+          <span class="post-meta">@{{ post.username }} · {{ post.tiempo }}</span>
+        </div>
+      </div>
+
+      <div class="post-content">
+        <h3 class="post-title">{{ post.titulo }}</h3>
+        <p class="post-text">{{ post.mensaje }}</p>
+        <img *ngIf="post.imagen" [src]="post.imagen" class="post-img" alt="imagen" />
+      </div>
+
+      <div class="post-footer">
+        <button class="action-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
+          <lucide-icon [img]="Heart" size="17"></lucide-icon>
+          <span>{{ post.likes }}</span>
+        </button>
+        <button class="action-btn" [class.active-comments]="post.showComments" (click)="toggleComments(post)">
+          <lucide-icon [img]="MessageCircle" size="17"></lucide-icon>
+          <span>{{ post.comentarios.length }}</span>
+        </button>
+      </div>
+
+      <!-- Comentarios -->
+      <div class="comments-wrap" *ngIf="post.showComments">
+        <div class="comment" *ngFor="let c of post.comentarios">
+          <div class="comment-av">{{ getInitials(c.autor) }}</div>
+          <div class="comment-body">
+            <span class="comment-name">{{ c.autor }}</span>
+            <span class="comment-text">{{ c.texto }}</span>
+            <span class="comment-time">{{ c.tiempo }}</span>
+          </div>
+        </div>
+        <div class="comment-input-row">
+          <input class="form-control form-control-sm"
+            [(ngModel)]="newCommentText[post.id]"
+            placeholder="Escribí un comentario..."
+            (keyup.enter)="addComment(post)" />
+          <button class="btn-send" (click)="addComment(post)">
+            <lucide-icon [img]="Send" size="14"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal nueva publicación -->
+<div class="modal-overlay" *ngIf="newPostModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>Nueva publicación</h4>
+      <button class="btn-close-modal" (click)="newPostModal = false">
+        <lucide-icon [img]="X" size="18"></lucide-icon>
+      </button>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Título *</label>
+      <input class="form-control" [(ngModel)]="nuevaPublicacion.titulo" placeholder="Título de la publicación" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Mensaje *</label>
+      <textarea class="form-control" [(ngModel)]="nuevaPublicacion.mensaje"
+        placeholder="¿Qué querés compartir?" rows="4"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Imagen (URL opcional)</label>
+      <input class="form-control" [(ngModel)]="nuevaPublicacion.imagen" placeholder="https://..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="newPostModal = false">Cancelar</button>
+      <button class="btn btn-primary" (click)="submitPost()">
+        <lucide-icon [img]="Rocket" size="14" class="me-1"></lucide-icon>
+        Publicar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal éxito -->
+<div class="modal-overlay" *ngIf="successModal">
+  <div class="modal-box" style="text-align:center">
+    <div class="modal-icon success">✓</div>
+    <h3>¡Publicado!</h3>
+    <p>Tu publicación fue agregada correctamente.</p>
+    <button class="btn btn-primary w-100" (click)="successModal = false">Aceptar</button>
+  </div>
+</div>

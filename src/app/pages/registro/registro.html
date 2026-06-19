@@ -1,0 +1,162 @@
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <lucide-icon [img]="Rocket" size="28" color="white"></lucide-icon>
+      </div>
+      <h1>Orbit</h1>
+      <p>Creá tu cuenta y despegá</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="avatar-section">
+        <div class="avatar-ring" (click)="fileInput.click()">
+          <div class="avatar-inner">
+            <img *ngIf="safePreview" [src]="safePreview" alt="Preview" />
+            <div *ngIf="!safePreview" class="avatar-placeholder">
+              <lucide-icon [img]="Camera" size="24" color="#5a6278"></lucide-icon>
+              <small>Foto</small>
+            </div>
+          </div>
+        </div>
+        <span class="avatar-hint">Tocá para subir tu foto de perfil</span>
+        <input #fileInput type="file" accept="image/*" hidden (change)="onFileChange($event)" />
+      </div>
+
+      <div class="section-label">Datos personales</div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Nombre *</label>
+          <input type="text" class="form-control"
+            [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched"
+            formControlName="nombre" placeholder="Juan" />
+          <div class="invalid-feedback" *ngIf="f['nombre'].touched">
+            <span *ngIf="f['nombre'].errors?.['required']">Obligatorio.</span>
+            <span *ngIf="f['nombre'].errors?.['minlength']">Mínimo 2 caracteres.</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Apellido *</label>
+          <input type="text" class="form-control"
+            [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched"
+            formControlName="apellido" placeholder="Pérez" />
+          <div class="invalid-feedback" *ngIf="f['apellido'].touched">
+            <span *ngIf="f['apellido'].errors?.['required']">Obligatorio.</span>
+            <span *ngIf="f['apellido'].errors?.['minlength']">Mínimo 2 caracteres.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Correo electrónico *</label>
+        <input type="email" class="form-control"
+          [class.is-invalid]="f['email'].invalid && f['email'].touched"
+          formControlName="email" placeholder="tu@email.com" />
+        <div class="invalid-feedback" *ngIf="f['email'].touched">
+          <span *ngIf="f['email'].errors?.['required']">Obligatorio.</span>
+          <span *ngIf="f['email'].errors?.['email']">Correo inválido.</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Nombre de usuario *</label>
+        <div class="input-group">
+          <span class="input-group-text">@</span>
+          <input type="text" class="form-control"
+            [class.is-invalid]="f['username'].invalid && f['username'].touched"
+            formControlName="username" placeholder="juanperez" />
+        </div>
+        <div class="invalid-feedback" *ngIf="f['username'].touched">
+          <span *ngIf="f['username'].errors?.['required']">Obligatorio.</span>
+          <span *ngIf="f['username'].errors?.['minlength']">Mínimo 3 caracteres.</span>
+          <span *ngIf="f['username'].errors?.['pattern']">Sin espacios.</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Fecha de nacimiento *</label>
+        <input type="date" class="form-control"
+          [class.is-invalid]="f['fechaNacimiento'].invalid && f['fechaNacimiento'].touched"
+          formControlName="fechaNacimiento" />
+        <div class="invalid-feedback" *ngIf="f['fechaNacimiento'].touched">
+          <span *ngIf="f['fechaNacimiento'].errors?.['required']">Obligatorio.</span>
+          <span *ngIf="f['fechaNacimiento'].errors?.['menorDeEdad']">Debés tener al menos 15 años para registrarte.</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción breve</label>
+        <textarea class="form-control" formControlName="descripcion"
+          placeholder="Contá algo sobre vos..." rows="2"
+          [class.is-invalid]="f['descripcion'].invalid && f['descripcion'].touched">
+        </textarea>
+        <div class="char-count"
+          [style.color]="(f['descripcion'].value?.length || 0) > 150 ? '#e74c6c' : '#5a6278'">
+          {{ f['descripcion'].value?.length || 0 }}/150
+        </div>
+      </div>
+
+      <div class="section-label">Seguridad</div>
+
+      <div class="mb-3">
+        <label class="form-label">Contraseña *</label>
+        <div class="input-group">
+          <input [type]="showPassword() ? 'text' : 'password'" class="form-control"
+            [class.is-invalid]="f['password'].invalid && f['password'].touched"
+            formControlName="password" placeholder="Mínimo 8 caracteres" />
+          <button class="btn btn-outline-secondary icon-btn" type="button"
+            (click)="showPassword.set(!showPassword())">
+            <lucide-icon [img]="showPassword() ? EyeOff : Eye" size="16"></lucide-icon>
+          </button>
+        </div>
+        <div class="invalid-feedback" *ngIf="f['password'].touched">
+          <span *ngIf="f['password'].errors?.['required']">Obligatorio.</span>
+          <span *ngIf="f['password'].errors?.['minlength']">Mínimo 8 caracteres.</span>
+          <span *ngIf="f['password'].errors?.['pattern']">Debe tener una mayúscula y un número.</span>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Repetir contraseña *</label>
+        <div class="input-group">
+          <input [type]="showConfirm() ? 'text' : 'password'" class="form-control"
+            [class.is-invalid]="f['confirmPassword'].touched && form.errors?.['mismatch']"
+            formControlName="confirmPassword" placeholder="Repetí tu contraseña" />
+          <button class="btn btn-outline-secondary icon-btn" type="button"
+            (click)="showConfirm.set(!showConfirm())">
+            <lucide-icon [img]="showConfirm() ? EyeOff : Eye" size="16"></lucide-icon>
+          </button>
+        </div>
+        <div class="invalid-feedback"
+          *ngIf="f['confirmPassword'].touched && form.errors?.['mismatch']">
+          Las contraseñas no coinciden.
+        </div>
+      </div>
+
+      <div class="alert alert-danger mb-3" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+      <button type="submit" class="btn btn-primary w-100 btn-submit" [disabled]="loading()">
+        <span *ngIf="loading()" class="spinner-border spinner-border-sm me-2"></span>
+        <lucide-icon *ngIf="!loading()" [img]="Rocket" size="16" class="me-2"></lucide-icon>
+        {{ loading() ? 'Creando cuenta...' : 'Crear mi cuenta' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      ¿Ya tenés cuenta? <a routerLink="/login">Iniciá sesión</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal éxito -->
+<div class="modal-overlay" *ngIf="successModal()">
+  <div class="modal-box">
+    <div class="modal-icon success">✓</div>
+    <h3>¡Bienvenido a Orbit!</h3>
+    <p>Tu cuenta fue creada exitosamente. ¡Listo para despegar!</p>
+    <button class="btn btn-primary w-100" (click)="goToLogin()">Ir al login</button>
+  </div>
+</div>
