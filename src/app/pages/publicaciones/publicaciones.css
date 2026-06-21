@@ -120,5 +120,44 @@
 }
 .btn-send:hover { transform: scale(1.05); }
 
-/* form-label dentro del modal */
+.form-label { color: #9098b1; font-size: 0.82rem; font-weight: 600; }
+
+.feed-controls {
+  display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+}
+.orden-btns {
+  display: flex; gap: 0.3rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 0.2rem;
+}
+.btn-orden {
+  background: none; border: none; color: #7a829e;
+  padding: 0.3rem 0.8rem; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.btn-orden.activo {
+  background: rgba(124,110,247,0.2);
+  color: #7c6ef7; font-weight: 600;
+}
+.btn-orden:hover:not(.activo) { color: var(--text-primary); }
+
+.pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1rem; margin-top: 1.5rem; padding-bottom: 2rem;
+}
+.btn-pag {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #7a829e; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all 0.2s;
+}
+.btn-pag:hover:not(:disabled) { border-color: #7c6ef7; color: #7c6ef7; }
+.btn-pag:disabled { opacity: 0.3; cursor: not-allowed; }
+.pag-info { color: #7a829e; font-size: 0.88rem; font-weight: 500; }
+
+.empty-state {
+  text-align: center; padding: 3rem; color: #5a6278;
+}
 .form-label { color: #9098b1; font-size: 0.82rem; font-weight: 600; }

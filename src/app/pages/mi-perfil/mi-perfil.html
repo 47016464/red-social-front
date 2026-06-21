@@ -29,10 +29,10 @@
     <div class="profile-banner">
       <div class="banner-bg"></div>
       <div class="profile-avatar-wrap">
-        <div class="profile-avatar" (click)="editMode && fileInput.click()">
-          <img *ngIf="user.avatar || previewUrl" [src]="previewUrl || user.avatar || ''" alt="avatar" />
-          <span *ngIf="!user.avatar && !previewUrl">{{ getInitials() }}</span>
-          <div class="avatar-edit-overlay" *ngIf="editMode">
+        <div class="profile-avatar" (click)="editMode() && fileInput.click()">
+          <img *ngIf="safeAvatar" [src]="safeAvatar" alt="avatar" />
+          <span *ngIf="!safeAvatar">{{ getInitials() }}</span>
+          <div class="avatar-edit-overlay" *ngIf="editMode()">
             <lucide-icon [img]="Camera" size="18" color="white"></lucide-icon>
           </div>
         </div>
@@ -46,19 +46,19 @@
           {{ user.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}
         </span>
       </div>
-      <button class="btn-edit" *ngIf="!editMode" (click)="editMode = true">
+      <button class="btn-edit" *ngIf="!editMode()" (click)="editMode.set(true)">
         <lucide-icon [img]="Edit" size="15"></lucide-icon>
         Editar perfil
       </button>
     </div>
 
     <!-- Descripción -->
-    <div class="profile-card" *ngIf="!editMode">
+    <div class="profile-card" *ngIf="!editMode()">
       <p class="user-bio">{{ user.descripcion }}</p>
     </div>
 
     <!-- Info -->
-    <div class="profile-card" *ngIf="!editMode">
+    <div class="profile-card" *ngIf="!editMode()">
       <div class="section-title">Información</div>
       <div class="info-row">
         <div class="info-icon"><lucide-icon [img]="Mail" size="15"></lucide-icon></div>
@@ -84,7 +84,7 @@
     </div>
 
     <!-- Form edición -->
-    <div class="profile-card" *ngIf="editMode">
+    <div class="profile-card" *ngIf="editMode()">
       <div class="section-title">Editar perfil</div>
       <form [formGroup]="form" novalidate>
         <div class="row g-3 mb-3">
@@ -115,15 +115,66 @@
       </form>
     </div>
 
+    <!-- Últimas 3 publicaciones -->
+    <div class="profile-card" *ngIf="!editMode()">
+      <div class="section-title">Mis últimas publicaciones</div>
+
+      <div *ngIf="ultimas3().length === 0" class="empty-pubs">
+        No tenés publicaciones todavía.
+      </div>
+
+      <div class="mini-post" *ngFor="let pub of ultimas3()">
+
+        <!-- Header mini post -->
+        <div class="mini-post-header">
+          <div>
+            <h4 class="mini-post-title">{{ pub.titulo }}</h4>
+            <span class="mini-post-time">{{ pub.tiempo }}</span>
+          </div>
+          <div class="mini-post-stats">
+            <span class="stat">
+              <lucide-icon [img]="Heart" size="13"></lucide-icon>
+              {{ pub.likes }}
+            </span>
+            <span class="stat">
+              <lucide-icon [img]="MessageCircle" size="13"></lucide-icon>
+              {{ pub.comentarios.length }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Texto -->
+        <p class="mini-post-text">{{ pub.mensaje }}</p>
+
+        <!-- Imagen -->
+        <img *ngIf="pub.imagen" [src]="pub.imagen" class="mini-post-img" alt="imagen" />
+
+        <!-- Toggle comentarios -->
+        <button class="btn-ver-comentarios" (click)="toggleComentarios(pub)"
+          *ngIf="pub.comentarios.length > 0">
+          {{ pub.showComments ? 'Ocultar' : 'Ver' }} comentarios ({{ pub.comentarios.length }})
+        </button>
+
+        <!-- Comentarios -->
+        <div class="mini-comments" *ngIf="pub.showComments">
+          <div class="mini-comment" *ngFor="let c of pub.comentarios">
+            <span class="mini-comment-autor">{{ c.autor }}:</span>
+            <span class="mini-comment-texto">{{ c.texto }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="successModal">
+<!-- Modal éxito -->
+<div class="modal-overlay" *ngIf="successModal()">
   <div class="modal-box" style="text-align:center">
     <div class="modal-icon success">✓</div>
     <h3>Perfil actualizado</h3>
     <p>Los cambios fueron guardados correctamente.</p>
-    <button class="btn btn-primary w-100" (click)="successModal = false">Aceptar</button>
+    <button class="btn btn-primary w-100" (click)="successModal.set(false)">Aceptar</button>
   </div>
 </div>

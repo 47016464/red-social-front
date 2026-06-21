@@ -25,79 +25,68 @@
 
   <div class="feed-body">
 
-    <!-- Header -->
+    <!-- Header con ordenamiento -->
     <div class="feed-header">
       <h2>Inicio</h2>
-      <button class="btn-new-post" (click)="newPostModal = true">
-        <lucide-icon [img]="Plus" size="16"></lucide-icon>
-        Nueva publicación
-      </button>
-    </div>
-
-    <!-- Posts -->
-    <div class="post-card" *ngFor="let post of publicaciones">
-      <div class="post-head">
-        <div class="post-avatar">{{ getInitials(post.autor) }}</div>
-        <div class="post-author-info">
-          <span class="post-name">{{ post.autor }}</span>
-          <span class="post-meta">@{{ post.username }} · {{ post.tiempo }}</span>
-        </div>
-      </div>
-
-      <div class="post-content">
-        <h3 class="post-title">{{ post.titulo }}</h3>
-        <p class="post-text">{{ post.mensaje }}</p>
-        <img *ngIf="post.imagen" [src]="post.imagen" class="post-img" alt="imagen" />
-      </div>
-
-      <div class="post-footer">
-        <button class="action-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
-          <lucide-icon [img]="Heart" size="17"></lucide-icon>
-          <span>{{ post.likes }}</span>
-        </button>
-        <button class="action-btn" [class.active-comments]="post.showComments" (click)="toggleComments(post)">
-          <lucide-icon [img]="MessageCircle" size="17"></lucide-icon>
-          <span>{{ post.comentarios.length }}</span>
-        </button>
-      </div>
-
-      <!-- Comentarios -->
-      <div class="comments-wrap" *ngIf="post.showComments">
-        <div class="comment" *ngFor="let c of post.comentarios">
-          <div class="comment-av">{{ getInitials(c.autor) }}</div>
-          <div class="comment-body">
-            <span class="comment-name">{{ c.autor }}</span>
-            <span class="comment-text">{{ c.texto }}</span>
-            <span class="comment-time">{{ c.tiempo }}</span>
-          </div>
-        </div>
-        <div class="comment-input-row">
-          <input class="form-control form-control-sm"
-            [(ngModel)]="newCommentText[post.id]"
-            placeholder="Escribí un comentario..."
-            (keyup.enter)="addComment(post)" />
-          <button class="btn-send" (click)="addComment(post)">
-            <lucide-icon [img]="Send" size="14"></lucide-icon>
+      <div class="feed-controls">
+        <div class="orden-btns">
+          <button class="btn-orden" [class.activo]="ordenamiento() === 'fecha'"
+            (click)="cambiarOrden('fecha')">
+            📅 Fecha
+          </button>
+          <button class="btn-orden" [class.activo]="ordenamiento() === 'likes'"
+            (click)="cambiarOrden('likes')">
+            ❤️ Likes
           </button>
         </div>
+        <button class="btn-new-post" (click)="newPostModal.set(true)">
+          <lucide-icon [img]="Plus" size="16"></lucide-icon>
+          Nueva publicación
+        </button>
       </div>
+    </div>
+
+    <!-- Lista de publicaciones como componentes -->
+    <app-publicacion-card
+      *ngFor="let post of publicacionesPaginadas()"
+      [post]="post"
+      (onLike)="toggleLike($event)"
+      (onEliminar)="eliminarPost($event)"
+      (oncomentar)="agregarComentario($event)">
+    </app-publicacion-card>
+
+    <!-- Sin publicaciones -->
+    <div class="empty-state" *ngIf="publicacionesPaginadas().length === 0">
+      <p>No hay publicaciones para mostrar.</p>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="totalPaginas() > 1">
+      <button class="btn-pag" (click)="paginaAnterior()" [disabled]="paginaActual() === 1">
+        <lucide-icon [img]="ChevronLeft" size="16"></lucide-icon>
+      </button>
+      <span class="pag-info">{{ paginaActual() }} / {{ totalPaginas() }}</span>
+      <button class="btn-pag" (click)="paginaSiguiente()" [disabled]="paginaActual() === totalPaginas()">
+        <lucide-icon [img]="ChevronRight" size="16"></lucide-icon>
+      </button>
     </div>
 
   </div>
 </div>
 
 <!-- Modal nueva publicación -->
-<div class="modal-overlay" *ngIf="newPostModal">
+<div class="modal-overlay" *ngIf="newPostModal()">
   <div class="modal-box">
     <div class="modal-head">
       <h4>Nueva publicación</h4>
-      <button class="btn-close-modal" (click)="newPostModal = false">
+      <button class="btn-close-modal" (click)="newPostModal.set(false)">
         <lucide-icon [img]="X" size="18"></lucide-icon>
       </button>
     </div>
     <div class="mb-3">
       <label class="form-label">Título *</label>
-      <input class="form-control" [(ngModel)]="nuevaPublicacion.titulo" placeholder="Título de la publicación" />
+      <input class="form-control" [(ngModel)]="nuevaPublicacion.titulo"
+        placeholder="Título de la publicación" />
     </div>
     <div class="mb-3">
       <label class="form-label">Mensaje *</label>
@@ -105,11 +94,11 @@
         placeholder="¿Qué querés compartir?" rows="4"></textarea>
     </div>
     <div class="mb-3">
-      <label class="form-label">Imagen (URL opcional)</label>
-      <input class="form-control" [(ngModel)]="nuevaPublicacion.imagen" placeholder="https://..." />
+      <label class="form-label">Imagen (opcional)</label>
+      <input type="file" class="form-control" accept="image/*" (change)="onImagenChange($event)" />
     </div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="newPostModal = false">Cancelar</button>
+      <button class="btn btn-secondary" (click)="newPostModal.set(false)">Cancelar</button>
       <button class="btn btn-primary" (click)="submitPost()">
         <lucide-icon [img]="Rocket" size="14" class="me-1"></lucide-icon>
         Publicar
@@ -119,11 +108,11 @@
 </div>
 
 <!-- Modal éxito -->
-<div class="modal-overlay" *ngIf="successModal">
+<div class="modal-overlay" *ngIf="successModal()">
   <div class="modal-box" style="text-align:center">
     <div class="modal-icon success">✓</div>
     <h3>¡Publicado!</h3>
     <p>Tu publicación fue agregada correctamente.</p>
-    <button class="btn btn-primary w-100" (click)="successModal = false">Aceptar</button>
+    <button class="btn btn-primary w-100" (click)="successModal.set(false)">Aceptar</button>
   </div>
 </div>

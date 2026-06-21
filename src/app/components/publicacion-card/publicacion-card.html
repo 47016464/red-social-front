@@ -1,0 +1,69 @@
+<div class="post-card">
+
+  <!-- Header -->
+  <div class="post-head">
+    <div class="post-avatar">{{ getInitials(post.autor) }}</div>
+    <div class="post-author-info">
+      <span class="post-name">{{ post.autor }}</span>
+      <span class="post-meta">@{{ post.username }} · {{ post.tiempo }}</span>
+    </div>
+    <button class="btn-delete" *ngIf="post.esPropia" (click)="confirmarEliminar()"
+      title="Eliminar publicación">
+      <lucide-icon [img]="Trash2" size="15"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Contenido -->
+  <div class="post-content">
+    <h3 class="post-title">{{ post.titulo }}</h3>
+    <p class="post-text">{{ post.mensaje }}</p>
+    <img *ngIf="post.imagen" [src]="post.imagen" class="post-img" alt="imagen" />
+  </div>
+
+  <!-- Acciones -->
+  <div class="post-footer">
+    <button class="action-btn" [class.liked]="post.liked" (click)="onLike.emit(post)">
+      <lucide-icon [img]="Heart" size="17"></lucide-icon>
+      <span>{{ post.likes }}</span>
+    </button>
+    <button class="action-btn" [class.active-comments]="post.showComments" (click)="toggleComments()">
+      <lucide-icon [img]="MessageCircle" size="17"></lucide-icon>
+      <span>{{ post.comentarios.length }}</span>
+    </button>
+  </div>
+
+  <!-- Comentarios -->
+  <div class="comments-wrap" *ngIf="post.showComments">
+    <div class="comment" *ngFor="let c of post.comentarios">
+      <div class="comment-av">{{ getInitials(c.autor) }}</div>
+      <div class="comment-body">
+        <span class="comment-name">{{ c.autor }}</span>
+        <span class="comment-text">{{ c.texto }}</span>
+        <span class="comment-time">{{ c.tiempo }}</span>
+      </div>
+    </div>
+    <div class="comment-input-row">
+      <input class="form-control form-control-sm"
+        [(ngModel)]="newCommentText"
+        placeholder="Escribí un comentario..."
+        (keyup.enter)="addComment()" />
+      <button class="btn-send" (click)="addComment()">
+        <lucide-icon [img]="Send" size="14"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal confirmar eliminación -->
+  <div class="modal-overlay" *ngIf="showConfirmDelete">
+    <div class="modal-box" style="text-align:center">
+      <div class="modal-icon danger">!</div>
+      <h3>¿Eliminar publicación?</h3>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="modal-actions" style="justify-content:center; gap:1rem">
+        <button class="btn btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+        <button class="btn btn-danger" (click)="eliminar()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

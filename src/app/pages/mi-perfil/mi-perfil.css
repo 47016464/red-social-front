@@ -110,3 +110,62 @@
 .form-label { color: #9098b1; font-size: 0.82rem; font-weight: 600; }
 .char-count { font-size: 0.75rem; color: #5a6278; text-align: right; margin-top: 0.25rem; }
 .edit-actions { display: flex; gap: 0.8rem; justify-content: flex-end; }
+
+.mini-post {
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem; background: rgba(255,255,255,0.02);
+  transition: border-color 0.2s;
+}
+.mini-post:hover { border-color: rgba(124,110,247,0.2); }
+.mini-post:last-child { margin-bottom: 0; }
+
+.mini-post-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 0.5rem;
+}
+.mini-post-title {
+  font-size: 0.95rem; font-weight: 700; margin: 0 0 0.15rem;
+}
+.mini-post-time { font-size: 0.75rem; color: #5a6278; }
+.mini-post-stats {
+  display: flex; gap: 0.8rem; flex-shrink: 0;
+}
+.stat {
+  display: flex; align-items: center; gap: 0.25rem;
+  font-size: 0.8rem; color: #7a829e;
+}
+.mini-post-text {
+  font-size: 0.88rem; color: #9098b1;
+  line-height: 1.5; margin: 0 0 0.5rem;
+}
+.mini-post-img {
+  width: 100%; border-radius: 8px;
+  max-height: 200px; object-fit: cover; margin-bottom: 0.5rem;
+}
+.btn-ver-comentarios {
+  background: none; border: none;
+  color: #7c6ef7; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; padding: 0; margin-bottom: 0.5rem;
+  transition: color 0.2s;
+}
+.btn-ver-comentarios:hover { color: #a89cf7; }
+
+.mini-comments {
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px; padding: 0.6rem 0.8rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+.mini-comment { font-size: 0.82rem; }
+.mini-comment-autor { font-weight: 700; color: #e8eaf6; margin-right: 0.3rem; }
+.mini-comment-texto { color: #9098b1; }
+
+.empty-pubs {
+  text-align: center; color: #5a6278;
+  font-size: 0.88rem; padding: 1rem 0;
+}
+
+/* form-label */
+.form-label { color: #9098b1; font-size: 0.82rem; font-weight: 600; }
+.char-count { font-size: 0.75rem; color: #5a6278; text-align: right; margin-top: 0.25rem; }
+.edit-actions { display: flex; gap: 0.8rem; justify-content: flex-end; }
