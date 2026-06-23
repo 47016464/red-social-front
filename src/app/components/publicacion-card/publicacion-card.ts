@@ -4,24 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Heart, MessageCircle, Send, Trash2 } from 'lucide-angular';
 
 export interface Comentario {
-  autor: string;
+  autor: any; // puede ser string (viejo) o { nombre, apellido, username } (backend)
   texto: string;
-  tiempo: string;
+  tiempo?: string;
+  creadoEn?: string;
 }
 
 export interface Publicacion {
-  id: number;
-  autor: string;
-  username: string;
-  tiempo: string;
+  _id: string;
   titulo: string;
   mensaje: string;
   imagen: string;
-  likes: number;
-  liked: boolean;
+  autor: { _id: string; nombre: string; apellido: string; username: string; imagenPerfil?: string };
+  likes: string[];          // array de IDs
   comentarios: Comentario[];
-  showComments: boolean;
-  esPropia: boolean;
+  createdAt: string;
+  eliminado: boolean;
+  showComments?: boolean;
 }
 
 @Component({
@@ -33,6 +32,7 @@ export interface Publicacion {
 })
 export class PublicacionCardComponent {
   @Input() post!: Publicacion;
+  @Input() usuarioActualId: string = '';   // para saber si liked / esPropia
   @Output() onLike = new EventEmitter<Publicacion>();
   @Output() onEliminar = new EventEmitter<Publicacion>();
   @Output() oncomentar = new EventEmitter<{ post: Publicacion; texto: string }>();
@@ -45,8 +45,35 @@ export class PublicacionCardComponent {
   newCommentText = '';
   showConfirmDelete = false;
 
-  getInitials(name: string) {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  get liked(): boolean {
+    return this.post.likes.includes(this.usuarioActualId);
+  }
+
+  get esPropia(): boolean {
+    return this.post.autor?._id === this.usuarioActualId;
+  }
+
+  get cantidadLikes(): number {
+    return this.post.likes.length;
+  }
+
+  get nombreAutor(): string {
+    return `${this.post.autor?.nombre ?? ''} ${this.post.autor?.apellido ?? ''}`.trim();
+  }
+
+  get usernameAutor(): string {
+    return this.post.autor?.username ?? '';
+  }
+
+  getInitials(): string {
+    const n = this.post.autor?.nombre?.[0] ?? '';
+    const a = this.post.autor?.apellido?.[0] ?? '';
+    return (n + a).toUpperCase();
+  }
+
+  getNombreComentario(autor: any): string {
+    if (typeof autor === 'string') return autor;
+    return `${autor?.nombre ?? ''} ${autor?.apellido ?? ''}`.trim();
   }
 
   toggleComments() {
@@ -60,14 +87,8 @@ export class PublicacionCardComponent {
     this.newCommentText = '';
   }
 
-  confirmarEliminar() {
-    this.showConfirmDelete = true;
-  }
-
-  cancelarEliminar() {
-    this.showConfirmDelete = false;
-  }
-
+  confirmarEliminar() { this.showConfirmDelete = true; }
+  cancelarEliminar() { this.showConfirmDelete = false; }
   eliminar() {
     this.showConfirmDelete = false;
     this.onEliminar.emit(this.post);

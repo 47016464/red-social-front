@@ -1,159 +1,200 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, Rocket, Plus, LogOut, Home, User, X, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-angular';
+import {
+  LucideAngularModule, Rocket, Plus, LogOut,
+  Home, User, X, ChevronLeft, ChevronRight,
+} from 'lucide-angular';
 import { PublicacionCardComponent, Publicacion } from '../../components/publicacion-card/publicacion-card';
+import { PublicacionesService } from '../../services/publicaciones.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-publicaciones',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, PublicacionCardComponent],
   templateUrl: './publicaciones.html',
-  styleUrl: './publicaciones.css'
+  styleUrl: './publicaciones.css',
 })
-export class PublicacionesComponent {
+export class PublicacionesComponent implements OnInit {
   readonly Rocket = Rocket; readonly Plus = Plus;
   readonly LogOut = LogOut; readonly Home = Home;
   readonly User = User; readonly X = X;
-  readonly ArrowUpDown = ArrowUpDown;
-  readonly ChevronLeft = ChevronLeft;
-  readonly ChevronRight = ChevronRight;
+  readonly ChevronLeft = ChevronLeft; readonly ChevronRight = ChevronRight;
 
-  // Estado con signals
+  // ── Estado ─────────────────────────────────────────────────────────────────
   newPostModal = signal(false);
   successModal = signal(false);
+  errorModal = signal(false);
+  errorMsg = signal('');
+  cargando = signal(false);
+
   ordenamiento = signal<'fecha' | 'likes'>('fecha');
   paginaActual = signal(1);
+  totalPublicaciones = signal(0);
   readonly porPagina = 5;
 
-  nuevaPublicacion = { titulo: '', mensaje: '', imagen: '' };
+  publicaciones = signal<Publicacion[]>([]);
+
+  nuevaPublicacion = { titulo: '', mensaje: '' };
   imagenFile: File | null = null;
 
-  // Usuario actual simulado (Sprint 2: vendrá del localStorage)
-  usuarioActual = 'yo';
+  usuarioActual: any;
 
-  todasLasPublicaciones = signal<Publicacion[]>([
-    {
-      id: 1, autor: 'María García', username: 'mgarcia', tiempo: 'hace 2 horas',
-      titulo: 'Bienvenidos a Orbit 🚀',
-      mensaje: 'Esta es la primera publicación de nuestra nueva red social.',
-      imagen: '', likes: 12, liked: false,
-      comentarios: [{ autor: 'Carlos', texto: '¡Genial!', tiempo: 'hace 1h' }],
-      showComments: false, esPropia: false
-    },
-    {
-      id: 2, autor: 'Lucas Rodríguez', username: 'lucasr', tiempo: 'hace 5 horas',
-      titulo: 'Tip de programación',
-      mensaje: 'Recuerden siempre validar sus formularios tanto en el frontend como en el backend.',
-      imagen: '', likes: 8, liked: false, comentarios: [], showComments: false, esPropia: false
-    },
-    {
-      id: 3, autor: 'Mi usuario', username: 'yo', tiempo: 'hace 1 día',
-      titulo: 'Mi primera publicación',
-      mensaje: 'Hola a todos! Esta es mi primera publicación en Orbit.',
-      imagen: '', likes: 3, liked: false, comentarios: [], showComments: false, esPropia: true
-    }
-  ]);
+  // Páginas totales calculadas desde el total del servidor
+  totalPaginas = computed(() => Math.ceil(this.totalPublicaciones() / this.porPagina));
 
-  // Publicaciones ordenadas
-  publicacionesOrdenadas = computed(() => {
-    const todas = [...this.todasLasPublicaciones()];
-    if (this.ordenamiento() === 'likes') {
-      return todas.sort((a, b) => b.likes - a.likes);
-    }
-    return todas.sort((a, b) => b.id - a.id);
-  });
+  constructor(
+    private router: Router,
+    private pubService: PublicacionesService,
+    private authService: AuthService,
+  ) {
+    this.usuarioActual = this.authService.getUsuario();
+  }
 
-  // Total de páginas
-  totalPaginas = computed(() =>
-    Math.ceil(this.publicacionesOrdenadas().length / this.porPagina)
-  );
+  ngOnInit() {
+    this.cargarPublicaciones();
+  }
 
-  // Publicaciones de la página actual
-  publicacionesPaginadas = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.porPagina;
-    return this.publicacionesOrdenadas().slice(inicio, inicio + this.porPagina);
-  });
+  // ── Cargar desde backend ───────────────────────────────────────────────────
+  cargarPublicaciones() {
+    this.cargando.set(true);
+    const offset = (this.paginaActual() - 1) * this.porPagina;
+    this.pubService.listar(this.ordenamiento(), offset, this.porPagina).subscribe({
+      next: (res) => {
+        this.publicaciones.set(res.publicaciones.map(p => ({ ...p, showComments: false })));
+        this.totalPublicaciones.set(res.total);
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.cargando.set(false);
+        this.mostrarError('No se pudieron cargar las publicaciones.');
+      },
+    });
+  }
 
-  constructor(private router: Router) {}
-
+  // ── Ordenamiento ───────────────────────────────────────────────────────────
   cambiarOrden(orden: 'fecha' | 'likes') {
     this.ordenamiento.set(orden);
     this.paginaActual.set(1);
+    this.cargarPublicaciones();
   }
 
+  // ── Paginación ─────────────────────────────────────────────────────────────
   paginaAnterior() {
-    if (this.paginaActual() > 1) this.paginaActual.update(p => p - 1);
+    if (this.paginaActual() > 1) {
+      this.paginaActual.update(p => p - 1);
+      this.cargarPublicaciones();
+    }
   }
 
   paginaSiguiente() {
-    if (this.paginaActual() < this.totalPaginas()) this.paginaActual.update(p => p + 1);
+    if (this.paginaActual() < this.totalPaginas()) {
+      this.paginaActual.update(p => p + 1);
+      this.cargarPublicaciones();
+    }
   }
 
-  toggleLike(post: Publicacion) {
-    this.todasLasPublicaciones.update(posts =>
-      posts.map(p => p.id === post.id
-        ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 }
-        : p
-      )
-    );
+  // ── Like ───────────────────────────────────────────────────────────────────
+  toggleLike(pub: Publicacion) {
+    const yaLikeó = pub.likes.includes(this.usuarioActual._id);
+    const accion$ = yaLikeó
+      ? this.pubService.quitarLike(pub._id)
+      : this.pubService.darLike(pub._id);
+
+    accion$.subscribe({
+      next: (res) => {
+        // Actualizamos likes localmente sin recargar todo
+        this.publicaciones.update(posts =>
+          posts.map(p => {
+            if (p._id !== pub._id) return p;
+            const likes = yaLikeó
+              ? p.likes.filter(id => id !== this.usuarioActual._id)
+              : [...p.likes, this.usuarioActual._id];
+            return { ...p, likes };
+          })
+        );
+      },
+      error: (err) => {
+        this.mostrarError(err?.error?.message || 'Error al procesar el Me Gusta.');
+      },
+    });
   }
 
-  eliminarPost(post: Publicacion) {
-    this.todasLasPublicaciones.update(posts => posts.filter(p => p.id !== post.id));
+  // ── Eliminar ───────────────────────────────────────────────────────────────
+  eliminarPost(pub: Publicacion) {
+    this.pubService.eliminar(pub._id).subscribe({
+      next: () => {
+        // Quitamos de la lista local y ajustamos total
+        this.publicaciones.update(posts => posts.filter(p => p._id !== pub._id));
+        this.totalPublicaciones.update(t => t - 1);
+      },
+      error: (err) => {
+        this.mostrarError(err?.error?.message || 'No se pudo eliminar la publicación.');
+      },
+    });
   }
 
+  // ── Comentar ───────────────────────────────────────────────────────────────
   agregarComentario(event: { post: Publicacion; texto: string }) {
-    this.todasLasPublicaciones.update(posts =>
-      posts.map(p => p.id === event.post.id
-        ? { ...p, comentarios: [...p.comentarios, { autor: 'Yo', texto: event.texto, tiempo: 'ahora' }] }
-        : p
-      )
-    );
+    this.pubService.comentar(event.post._id, event.texto).subscribe({
+      next: (pubActualizada) => {
+        this.publicaciones.update(posts =>
+          posts.map(p => p._id === event.post._id
+            ? { ...pubActualizada, showComments: true }
+            : p
+          )
+        );
+      },
+      error: () => this.mostrarError('No se pudo agregar el comentario.'),
+    });
   }
 
+  // ── Nueva publicación ──────────────────────────────────────────────────────
   onImagenChange(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) this.imagenFile = file;
   }
 
   submitPost() {
-  if (!this.nuevaPublicacion.titulo.trim() || !this.nuevaPublicacion.mensaje.trim()) return;
+    if (!this.nuevaPublicacion.titulo.trim() || !this.nuevaPublicacion.mensaje.trim()) return;
 
-  let imagenUrl = '';
+    const formData = new FormData();
+    formData.append('titulo', this.nuevaPublicacion.titulo);
+    formData.append('mensaje', this.nuevaPublicacion.mensaje);
+    if (this.imagenFile) formData.append('imagen', this.imagenFile);
 
-  if (this.imagenFile) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const nueva: Publicacion = {
-        id: Date.now(), autor: 'Mi usuario', username: this.usuarioActual,
-        tiempo: 'ahora', titulo: this.nuevaPublicacion.titulo,
-        mensaje: this.nuevaPublicacion.mensaje,
-        imagen: reader.result as string,
-        likes: 0, liked: false, comentarios: [], showComments: false, esPropia: true
-      };
-      this.todasLasPublicaciones.update(posts => [nueva, ...posts]);
-      this.nuevaPublicacion = { titulo: '', mensaje: '', imagen: '' };
-      this.imagenFile = null;
-      this.newPostModal.set(false);
-      this.successModal.set(true);
-    };
-    reader.readAsDataURL(this.imagenFile);
-  } else {
-    const nueva: Publicacion = {
-      id: Date.now(), autor: 'Mi usuario', username: this.usuarioActual,
-      tiempo: 'ahora', titulo: this.nuevaPublicacion.titulo,
-      mensaje: this.nuevaPublicacion.mensaje, imagen: '',
-      likes: 0, liked: false, comentarios: [], showComments: false, esPropia: true
-    };
-    this.todasLasPublicaciones.update(posts => [nueva, ...posts]);
-    this.nuevaPublicacion = { titulo: '', mensaje: '', imagen: '' };
-    this.imagenFile = null;
-    this.newPostModal.set(false);
-    this.successModal.set(true);
+    this.pubService.crear(formData).subscribe({
+      next: () => {
+        this.nuevaPublicacion = { titulo: '', mensaje: '' };
+        this.imagenFile = null;
+        this.newPostModal.set(false);
+        this.successModal.set(true);
+        // Volvemos a la primer página para ver la publicación nueva
+        this.paginaActual.set(1);
+        this.ordenamiento.set('fecha');
+        this.cargarPublicaciones();
+      },
+      error: (err) => {
+        this.mostrarError(err?.error?.message || 'No se pudo crear la publicación.');
+      },
+    });
   }
-}
 
-  logout() { localStorage.clear(); this.router.navigate(['/login']); }
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  yaLikeó(pub: Publicacion): boolean {
+    return pub.likes.includes(this.usuarioActual?._id);
+  }
+
+  esMia(pub: Publicacion): boolean {
+    return pub.autor?._id === this.usuarioActual?._id;
+  }
+
+  mostrarError(msg: string) {
+    this.errorMsg.set(msg);
+    this.errorModal.set(true);
+  }
+
+  logout() { this.authService.logout(); }
 }

@@ -1,19 +1,23 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { LucideAngularModule, Rocket, Edit, LogOut, Home, User, Camera, Mail, Calendar, Shield, Heart, MessageCircle } from 'lucide-angular';
-import { Publicacion } from '../../components/publicacion-card/publicacion-card';
+import {
+  LucideAngularModule, Rocket, Edit, LogOut, Home,
+  User, Camera, Mail, Calendar, Shield, Heart, MessageCircle,
+} from 'lucide-angular';
+import { PublicacionesService } from '../../services/publicaciones.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-mi-perfil',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule],
   templateUrl: './mi-perfil.html',
-  styleUrl: './mi-perfil.css'
+  styleUrl: './mi-perfil.css',
 })
-export class MiPerfilComponent {
+export class MiPerfilComponent implements OnInit {
   readonly Rocket = Rocket; readonly Edit = Edit;
   readonly LogOut = LogOut; readonly Home = Home;
   readonly User = User; readonly Camera = Camera;
@@ -25,43 +29,10 @@ export class MiPerfilComponent {
   successModal = signal(false);
   previewUrl = signal<string | null>(null);
 
-  user = {
-    nombre: 'Juan', apellido: 'Pérez', username: 'juanperez',
-    email: 'juan@email.com',
-    descripcion: 'Apasionado por la tecnología y el desarrollo web.',
-    fechaNacimiento: '1998-05-15', perfil: 'usuario',
-    avatar: null as string | null
-  };
+  // Se llena desde localStorage al iniciar
+  user: any = {};
 
-  // Últimas 3 publicaciones propias (Sprint 2: vendrán del backend)
-  misPublicaciones = signal<Publicacion[]>([
-    {
-      id: 3, autor: 'Juan Pérez', username: 'juanperez', tiempo: 'hace 1 día',
-      titulo: 'Mi primera publicación',
-      mensaje: 'Hola a todos! Esta es mi primera publicación en Orbit.',
-      imagen: '', likes: 3, liked: false,
-      comentarios: [{ autor: 'María', texto: 'Bienvenido!', tiempo: 'hace 20h' }],
-      showComments: false, esPropia: true
-    },
-    {
-      id: 4, autor: 'Juan Pérez', username: 'juanperez', tiempo: 'hace 3 días',
-      titulo: 'Aprendiendo Angular',
-      mensaje: 'Angular 17 con Signals es una maravilla. Lo recomiendo totalmente.',
-      imagen: '', likes: 7, liked: false,
-      comentarios: [],
-      showComments: false, esPropia: true
-    },
-    {
-      id: 5, autor: 'Juan Pérez', username: 'juanperez', tiempo: 'hace 1 semana',
-      titulo: 'NestJS + MongoDB',
-      mensaje: 'Combinación perfecta para el backend. Atlas hace todo más fácil.',
-      imagen: '', likes: 5, liked: false,
-      comentarios: [
-        { autor: 'Lucas', texto: 'Totalmente de acuerdo!', tiempo: 'hace 5 días' }
-      ],
-      showComments: false, esPropia: true
-    }
-  ]);
+  misPublicaciones = signal<any[]>([]);
 
   ultimas3 = computed(() => this.misPublicaciones().slice(0, 3));
 
@@ -70,23 +41,37 @@ export class MiPerfilComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private sanitizer: DomSanitizer
-  ) {
+    private sanitizer: DomSanitizer,
+    private pubService: PublicacionesService,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit() {
+    this.user = this.authService.getUsuario() ?? {};
     this.form = this.fb.group({
-      nombre: [this.user.nombre, [Validators.required, Validators.minLength(2)]],
-      apellido: [this.user.apellido, [Validators.required, Validators.minLength(2)]],
-      descripcion: [this.user.descripcion, Validators.maxLength(150)]
+      nombre: [this.user.nombre ?? '', [Validators.required, Validators.minLength(2)]],
+      apellido: [this.user.apellido ?? '', [Validators.required, Validators.minLength(2)]],
+      descripcion: [this.user.descripcion ?? '', Validators.maxLength(150)],
     });
+
+    if (this.user._id) {
+      this.pubService.listar('fecha', 0, 3, this.user._id).subscribe({
+        next: (res) => this.misPublicaciones.set(res.publicaciones),
+        error: () => {},
+      });
+    }
   }
 
   get f() { return this.form.controls; }
 
-  getInitials() {
-    return (this.user.nombre[0] + this.user.apellido[0]).toUpperCase();
+  getInitials(): string {
+    const n = this.user.nombre?.[0] ?? '';
+    const a = this.user.apellido?.[0] ?? '';
+    return (n + a).toUpperCase();
   }
 
   get safeAvatar(): SafeUrl | null {
-    const url = this.previewUrl() || this.user.avatar;
+    const url = this.previewUrl() || this.user.imagenPerfil;
     return url ? this.sanitizer.bypassSecurityTrustUrl(url) : null;
   }
 
@@ -94,18 +79,24 @@ export class MiPerfilComponent {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => { this.previewUrl.set(reader.result as string); };
+    reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
   }
 
   saveChanges() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.user.nombre = this.form.value.nombre;
-    this.user.apellido = this.form.value.apellido;
-    this.user.descripcion = this.form.value.descripcion;
-    if (this.previewUrl()) this.user.avatar = this.previewUrl();
+    // Actualizamos el objeto local y el localStorage
+    this.user = {
+      ...this.user,
+      nombre: this.form.value.nombre,
+      apellido: this.form.value.apellido,
+      descripcion: this.form.value.descripcion,
+      ...(this.previewUrl() ? { imagenPerfil: this.previewUrl() } : {}),
+    };
+    localStorage.setItem('usuario', JSON.stringify(this.user));
     this.editMode.set(false);
     this.successModal.set(true);
+    // TODO Sprint 3: llamar a endpoint PUT /usuarios/:id para persistir en DB
   }
 
   cancelEdit() {
@@ -114,13 +105,13 @@ export class MiPerfilComponent {
     this.form.patchValue({
       nombre: this.user.nombre,
       apellido: this.user.apellido,
-      descripcion: this.user.descripcion
+      descripcion: this.user.descripcion,
     });
   }
 
-  toggleComentarios(pub: Publicacion) {
+  toggleComentarios(pub: any) {
     pub.showComments = !pub.showComments;
   }
 
-  logout() { localStorage.clear(); this.router.navigate(['/login']); }
+  logout() { this.authService.logout(); }
 }

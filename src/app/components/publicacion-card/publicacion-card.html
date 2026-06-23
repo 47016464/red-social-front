@@ -2,12 +2,16 @@
 
   <!-- Header -->
   <div class="post-head">
-    <div class="post-avatar">{{ getInitials(post.autor) }}</div>
-    <div class="post-author-info">
-      <span class="post-name">{{ post.autor }}</span>
-      <span class="post-meta">@{{ post.username }} · {{ post.tiempo }}</span>
+    <!-- Avatar: foto si tiene, iniciales si no -->
+    <div class="post-avatar">
+      <img *ngIf="post.autor.imagenPerfil" [src]="post.autor.imagenPerfil" alt="avatar" class="avatar-img" />
+      <span *ngIf="!post.autor.imagenPerfil">{{ getInitials() }}</span>
     </div>
-    <button class="btn-delete" *ngIf="post.esPropia" (click)="confirmarEliminar()"
+    <div class="post-author-info">
+      <span class="post-name">{{ nombreAutor || 'Usuario' }}</span>
+      <span class="post-meta">@{{ usernameAutor || '?' }} · {{ post.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <button class="btn-delete" *ngIf="esPropia" (click)="confirmarEliminar()"
       title="Eliminar publicación">
       <lucide-icon [img]="Trash2" size="15"></lucide-icon>
     </button>
@@ -22,9 +26,9 @@
 
   <!-- Acciones -->
   <div class="post-footer">
-    <button class="action-btn" [class.liked]="post.liked" (click)="onLike.emit(post)">
+    <button class="action-btn" [class.liked]="liked" (click)="onLike.emit(post)">
       <lucide-icon [img]="Heart" size="17"></lucide-icon>
-      <span>{{ post.likes }}</span>
+      <span>{{ cantidadLikes }}</span>
     </button>
     <button class="action-btn" [class.active-comments]="post.showComments" (click)="toggleComments()">
       <lucide-icon [img]="MessageCircle" size="17"></lucide-icon>
@@ -35,11 +39,14 @@
   <!-- Comentarios -->
   <div class="comments-wrap" *ngIf="post.showComments">
     <div class="comment" *ngFor="let c of post.comentarios">
-      <div class="comment-av">{{ getInitials(c.autor) }}</div>
+      <div class="comment-av">
+        <img *ngIf="c.autor?.imagenPerfil" [src]="c.autor.imagenPerfil" alt="avatar" class="avatar-img" />
+        <span *ngIf="!c.autor?.imagenPerfil">{{ getNombreComentario(c.autor)[0] }}</span>
+      </div>
       <div class="comment-body">
-        <span class="comment-name">{{ c.autor }}</span>
+        <span class="comment-name">{{ getNombreComentario(c.autor) }}</span>
         <span class="comment-text">{{ c.texto }}</span>
-        <span class="comment-time">{{ c.tiempo }}</span>
+        <span class="comment-time">{{ c.creadoEn | date:'dd/MM HH:mm' }}</span>
       </div>
     </div>
     <div class="comment-input-row">

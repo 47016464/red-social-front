@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Rocket, Eye, EyeOff, Camera } from 'lucide-angular';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { signal } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 
 function passwordMatch(control: AbstractControl): ValidationErrors | null {
   const pass = control.get('password')?.value;
@@ -51,7 +52,8 @@ export class RegistroComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private authService: AuthService
   ) {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
@@ -90,10 +92,28 @@ export class RegistroComponent {
     this.loading.set(true);
     this.errorMsg.set('');
 
-    setTimeout(() => {
-      this.loading.set(false);
-      this.successModal.set(true);
-    }, 1000);
+    const formData = new FormData();
+    formData.append('nombre', this.form.value.nombre);
+    formData.append('apellido', this.form.value.apellido);
+    formData.append('email', this.form.value.email);
+    formData.append('username', this.form.value.username);
+    formData.append('fechaNacimiento', this.form.value.fechaNacimiento);
+    formData.append('descripcion', this.form.value.descripcion ?? '');
+    formData.append('password', this.form.value.password);
+    if (this.selectedFile) {
+      formData.append('imagenPerfil', this.selectedFile);
+    }
+
+    this.authService.registro(formData).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.successModal.set(true);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMsg.set(err?.error?.message || 'Error al registrarse. Intentá de nuevo.');
+      }
+    });
   }
 
   goToLogin() {

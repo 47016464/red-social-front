@@ -46,17 +46,18 @@
       </div>
     </div>
 
-    <!-- Lista de publicaciones como componentes -->
+    <!-- Lista de publicaciones -->
     <app-publicacion-card
-      *ngFor="let post of publicacionesPaginadas()"
+      *ngFor="let post of publicaciones()"
       [post]="post"
+      [usuarioActualId]="usuarioActual?._id"
       (onLike)="toggleLike($event)"
       (onEliminar)="eliminarPost($event)"
       (oncomentar)="agregarComentario($event)">
     </app-publicacion-card>
 
     <!-- Sin publicaciones -->
-    <div class="empty-state" *ngIf="publicacionesPaginadas().length === 0">
+    <div class="empty-state" *ngIf="publicaciones().length === 0">
       <p>No hay publicaciones para mostrar.</p>
     </div>
 
@@ -114,5 +115,15 @@
     <h3>¡Publicado!</h3>
     <p>Tu publicación fue agregada correctamente.</p>
     <button class="btn btn-primary w-100" (click)="successModal.set(false)">Aceptar</button>
+  </div>
+</div>
+
+<!-- Modal error -->
+<div class="modal-overlay" *ngIf="errorModal()">
+  <div class="modal-box" style="text-align:center">
+    <div class="modal-icon danger">!</div>
+    <h3>Error</h3>
+    <p>{{ errorMsg() }}</p>
+    <button class="btn btn-primary w-100" (click)="errorModal.set(false)">Aceptar</button>
   </div>
 </div>
