@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { AuthService } from './auth.service';
 
-const API = 'http://localhost:3000/publicaciones';
+const API = 'https://red-social-back-production.up.railway.app/publicaciones';
 
 @Injectable({ providedIn: 'root' })
 export class PublicacionesService {
