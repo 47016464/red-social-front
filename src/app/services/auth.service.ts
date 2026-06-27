@@ -1,10 +1,11 @@
 import { Injectable, PLATFORM_ID, inject } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { tap } from "rxjs/operators";
+import { environment } from "../../environments/environment";
 
-const API = "https://red-social-back-production.up.railway.app/auth";
+const API = `${environment.apiUrl}/auth`;
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -34,6 +35,13 @@ export class AuthService {
     );
   }
 
+  autorizar() {
+    const token = this.getToken();
+    return this.http.post<{ valido: boolean; usuario: any }>(`${API}/autorizar`, {}, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+    });
+  }
+
   logout() {
     this.storage.clear();
     this.router.navigate(["/login"]);
@@ -47,4 +55,16 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean { return !!this.getToken(); }
+
+  refrescar() {
+    const token = this.getToken();
+    return this.http.post<{ token: string; usuario: any }>(`${API}/refrescar`, {}, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+    }).pipe(
+      tap(res => {
+        this.storage.set('token', res.token);
+        this.storage.set('usuario', JSON.stringify(res.usuario));
+      })
+    );
+  }
 }

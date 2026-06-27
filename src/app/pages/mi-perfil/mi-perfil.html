@@ -110,7 +110,9 @@
         </div>
         <div class="edit-actions">
           <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancelar</button>
-          <button type="button" class="btn btn-primary" (click)="saveChanges()">Guardar cambios</button>
+          <button type="button" class="btn btn-primary" (click)="saveChanges()" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
         </div>
       </form>
     </div>
@@ -124,45 +126,37 @@
       </div>
 
       <div class="mini-post" *ngFor="let pub of ultimas3()">
-
-        <!-- Header mini post -->
         <div class="mini-post-header">
           <div>
             <h4 class="mini-post-title">{{ pub.titulo }}</h4>
-            <span class="mini-post-time">{{ pub.tiempo }}</span>
+            <span class="mini-post-time">{{ pub.createdAt | date:'dd/MM/yyyy' }}</span>
           </div>
           <div class="mini-post-stats">
             <span class="stat">
               <lucide-icon [img]="Heart" size="13"></lucide-icon>
-              {{ pub.likes }}
+              {{ pub.likes?.length ?? 0 }}
             </span>
             <span class="stat">
               <lucide-icon [img]="MessageCircle" size="13"></lucide-icon>
-              {{ pub.comentarios.length }}
+              {{ pub.comentarios?.length ?? 0 }}
             </span>
           </div>
         </div>
 
-        <!-- Texto -->
         <p class="mini-post-text">{{ pub.mensaje }}</p>
-
-        <!-- Imagen -->
         <img *ngIf="pub.imagen" [src]="pub.imagen" class="mini-post-img" alt="imagen" />
 
-        <!-- Toggle comentarios -->
         <button class="btn-ver-comentarios" (click)="toggleComentarios(pub)"
-          *ngIf="pub.comentarios.length > 0">
+          *ngIf="pub.comentarios?.length > 0">
           {{ pub.showComments ? 'Ocultar' : 'Ver' }} comentarios ({{ pub.comentarios.length }})
         </button>
 
-        <!-- Comentarios -->
         <div class="mini-comments" *ngIf="pub.showComments">
           <div class="mini-comment" *ngFor="let c of pub.comentarios">
-            <span class="mini-comment-autor">{{ c.autor }}:</span>
+            <span class="mini-comment-autor">{{ c.autor?.nombre ?? c.autor }}:</span>
             <span class="mini-comment-texto">{{ c.texto }}</span>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -176,5 +170,15 @@
     <h3>Perfil actualizado</h3>
     <p>Los cambios fueron guardados correctamente.</p>
     <button class="btn btn-primary w-100" (click)="successModal.set(false)">Aceptar</button>
+  </div>
+</div>
+
+<!-- Modal error -->
+<div class="modal-overlay" *ngIf="errorModal()">
+  <div class="modal-box" style="text-align:center">
+    <div class="modal-icon danger">!</div>
+    <h3>Error</h3>
+    <p>{{ errorMsg() }}</p>
+    <button class="btn btn-primary w-100" (click)="errorModal.set(false)">Aceptar</button>
   </div>
 </div>

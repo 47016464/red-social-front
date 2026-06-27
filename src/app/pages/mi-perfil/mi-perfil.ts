@@ -9,6 +9,7 @@ import {
 } from 'lucide-angular';
 import { PublicacionesService } from '../../services/publicaciones.service';
 import { AuthService } from '../../services/auth.service';
+import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-mi-perfil',
@@ -27,15 +28,15 @@ export class MiPerfilComponent implements OnInit {
 
   editMode = signal(false);
   successModal = signal(false);
+  errorModal = signal(false);
+  errorMsg = signal('');
+  guardando = signal(false);
   previewUrl = signal<string | null>(null);
+  selectedFile: File | null = null;
 
-  // Se llena desde localStorage al iniciar
   user: any = {};
-
   misPublicaciones = signal<any[]>([]);
-
   ultimas3 = computed(() => this.misPublicaciones().slice(0, 3));
-
   form!: FormGroup;
 
   constructor(
@@ -44,6 +45,7 @@ export class MiPerfilComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private pubService: PublicacionesService,
     private authService: AuthService,
+    private usuariosService: UsuariosService,
   ) {}
 
   ngOnInit() {
@@ -78,6 +80,7 @@ export class MiPerfilComponent implements OnInit {
   onFileChange(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+    this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
@@ -85,23 +88,39 @@ export class MiPerfilComponent implements OnInit {
 
   saveChanges() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    // Actualizamos el objeto local y el localStorage
-    this.user = {
-      ...this.user,
-      nombre: this.form.value.nombre,
-      apellido: this.form.value.apellido,
-      descripcion: this.form.value.descripcion,
-      ...(this.previewUrl() ? { imagenPerfil: this.previewUrl() } : {}),
-    };
-    localStorage.setItem('usuario', JSON.stringify(this.user));
-    this.editMode.set(false);
-    this.successModal.set(true);
-    // TODO Sprint 3: llamar a endpoint PUT /usuarios/:id para persistir en DB
+    this.guardando.set(true);
+
+    const formData = new FormData();
+    formData.append('nombre', this.form.value.nombre);
+    formData.append('apellido', this.form.value.apellido);
+    formData.append('descripcion', this.form.value.descripcion ?? '');
+    if (this.selectedFile) {
+      formData.append('imagenPerfil', this.selectedFile);
+    }
+
+    this.usuariosService.actualizar(this.user._id, formData).subscribe({
+      next: (res) => {
+        // Actualizar datos locales y localStorage
+        this.user = { ...this.user, ...res.usuario };
+        localStorage.setItem('usuario', JSON.stringify(this.user));
+        this.previewUrl.set(null);
+        this.selectedFile = null;
+        this.guardando.set(false);
+        this.editMode.set(false);
+        this.successModal.set(true);
+      },
+      error: (err) => {
+        this.guardando.set(false);
+        this.errorMsg.set(err?.error?.message || 'Error al guardar los cambios.');
+        this.errorModal.set(true);
+      },
+    });
   }
 
   cancelEdit() {
     this.editMode.set(false);
     this.previewUrl.set(null);
+    this.selectedFile = null;
     this.form.patchValue({
       nombre: this.user.nombre,
       apellido: this.user.apellido,

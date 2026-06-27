@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
-const API = 'https://red-social-back-production.up.railway.app/publicaciones';
+const API = `${environment.apiUrl}/publicaciones`;
 
 @Injectable({ providedIn: 'root' })
 export class PublicacionesService {
@@ -19,6 +20,22 @@ export class PublicacionesService {
       .set('limit', limit.toString());
     if (usuarioId) params = params.set('usuarioId', usuarioId);
     return this.http.get<{ publicaciones: any[]; total: number }>(API, {
+      headers: this.headers(), params,
+    });
+  }
+
+  obtener(id: string, commentOffset = 0, commentLimit = 5) {
+    const params = new HttpParams()
+      .set('commentOffset', commentOffset.toString())
+      .set('commentLimit', commentLimit.toString());
+    return this.http.get<any>(`${API}/${id}`, { headers: this.headers(), params });
+  }
+
+  cargarComentarios(id: string, offset = 0, limit = 5) {
+    const params = new HttpParams()
+      .set('offset', offset.toString())
+      .set('limit', limit.toString());
+    return this.http.get<{ comentarios: any[]; total: number }>(`${API}/${id}/comentarios`, {
       headers: this.headers(), params,
     });
   }
@@ -40,10 +57,10 @@ export class PublicacionesService {
   }
 
   comentar(id: string, texto: string) {
-    return this.http.post<any>(
-      `${API}/${id}/comentarios`,
-      { texto },
-      { headers: this.headers() },
-    );
+    return this.http.post<any>(`${API}/${id}/comentarios`, { texto }, { headers: this.headers() });
+  }
+
+  editarComentario(id: string, comentarioId: string, texto: string) {
+    return this.http.put<any>(`${API}/${id}/comentarios/${comentarioId}`, { texto }, { headers: this.headers() });
   }
 }

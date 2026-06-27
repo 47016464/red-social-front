@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Rocket, Eye, EyeOff } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
+import { SesionService } from '../../services/sesion.service';
 
 @Component({
   selector: 'app-login',
@@ -22,10 +23,14 @@ export class LoginComponent implements OnInit {
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
 
-  constructor(private fb: FormBuilder, private router: Router, private authService: AuthService) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService,
+    private sesionService: SesionService,
+  ) {}
 
   ngOnInit() {
-    // Si ya está logueado, redirigir directo
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/publicaciones']);
       return;
@@ -53,6 +58,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(identifier, password).subscribe({
       next: () => {
         this.loading = false;
+        this.sesionService.dispararTimer(); // Arranca el contador de sesión
         this.router.navigate(['/publicaciones']);
       },
       error: (err) => {

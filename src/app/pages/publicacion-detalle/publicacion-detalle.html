@@ -1,0 +1,130 @@
+<div class="detalle-page">
+
+  <!-- Navbar -->
+  <nav class="topbar">
+    <div class="topbar-brand" routerLink="/publicaciones">
+      <div class="topbar-logo">
+        <lucide-icon [img]="Rocket" size="18" color="white"></lucide-icon>
+      </div>
+      <span>Orbit</span>
+    </div>
+    <div class="topbar-actions">
+      <a routerLink="/publicaciones" class="topbar-link">
+        <lucide-icon [img]="Home" size="18"></lucide-icon>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/mi-perfil" class="topbar-link">
+        <lucide-icon [img]="User" size="18"></lucide-icon>
+        <span>Mi Perfil</span>
+      </a>
+      <button class="topbar-logout" (click)="logout()">
+        <lucide-icon [img]="LogOut" size="16"></lucide-icon>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Cargando -->
+  <div class="detalle-body" *ngIf="cargando()">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="detalle-body" *ngIf="!cargando() && publicacion()">
+
+    <!-- Card publicación -->
+    <div class="pub-card">
+      <div class="pub-head">
+        <div class="pub-avatar">
+          <img *ngIf="publicacion().autor?.imagenPerfil" [src]="publicacion().autor.imagenPerfil" class="avatar-img" />
+          <span *ngIf="!publicacion().autor?.imagenPerfil">
+            {{ (publicacion().autor?.nombre?.[0] ?? '') + (publicacion().autor?.apellido?.[0] ?? '') }}
+          </span>
+        </div>
+        <div>
+          <div class="pub-autor">{{ publicacion().autor?.nombre }} {{ publicacion().autor?.apellido }}</div>
+          <div class="pub-meta">@{{ publicacion().autor?.username }} · {{ publicacion().createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+
+      <h2 class="pub-titulo">{{ publicacion().titulo }}</h2>
+      <p class="pub-mensaje">{{ publicacion().mensaje }}</p>
+      <img *ngIf="publicacion().imagen" [src]="publicacion().imagen" class="pub-img" />
+
+      <div class="pub-footer">
+        <button class="action-btn" [class.liked]="liked" (click)="toggleLike()">
+          <lucide-icon [img]="Heart" size="17"></lucide-icon>
+          <span>{{ cantidadLikes }}</span>
+        </button>
+        <span class="comentarios-count">{{ totalComentarios() }} comentarios</span>
+      </div>
+    </div>
+
+    <!-- Comentarios -->
+    <div class="comentarios-section">
+      <h3 class="comentarios-titulo">Comentarios</h3>
+
+      <div class="comentario" *ngFor="let c of comentariosVisibles">
+        <div class="comentario-avatar">
+          <img *ngIf="c.autor?.imagenPerfil" [src]="c.autor.imagenPerfil" class="avatar-img" />
+          <span *ngIf="!c.autor?.imagenPerfil">{{ getNombreAutor(c.autor)[0] }}</span>
+        </div>
+        <div class="comentario-body">
+          <div class="comentario-head">
+            <span class="comentario-autor">{{ getNombreAutor(c.autor) }}</span>
+            <span class="comentario-time">{{ c.creadoEn | date:'dd/MM HH:mm' }}</span>
+            <span class="editado-badge" *ngIf="c.editado">editado</span>
+            <button class="btn-edit-comment" *ngIf="esMiComentario(c) && editandoId() !== c._id"
+              (click)="iniciarEdicion(c)">
+              <lucide-icon [img]="Edit2" size="13"></lucide-icon>
+            </button>
+          </div>
+
+          <!-- Modo edición -->
+          <div *ngIf="editandoId() === c._id" class="edit-row">
+            <input class="form-control form-control-sm" [(ngModel)]="textoEditado"
+              (keyup.enter)="guardarEdicion(c)" />
+            <button class="btn-icon" (click)="guardarEdicion(c)">
+              <lucide-icon [img]="Check" size="14"></lucide-icon>
+            </button>
+            <button class="btn-icon btn-icon-cancel" (click)="cancelarEdicion()">
+              <lucide-icon [img]="X" size="14"></lucide-icon>
+            </button>
+          </div>
+
+          <!-- Texto normal -->
+          <p class="comentario-texto" *ngIf="editandoId() !== c._id">{{ c.texto }}</p>
+        </div>
+      </div>
+
+      <!-- Sin comentarios -->
+      <div class="empty-comments" *ngIf="comentariosVisibles.length === 0">
+        No hay comentarios todavía. ¡Sé el primero!
+      </div>
+
+      <!-- Cargar todos -->
+      <button class="btn-cargar-mas" *ngIf="hayMasComentarios" (click)="cargarTodos()" [disabled]="cargandoMas()">
+        <lucide-icon [img]="ChevronDown" size="15"></lucide-icon>
+        {{ cargandoMas() ? 'Cargando...' : 'Ver todos los comentarios (' + totalComentarios() + ')' }}
+      </button>
+
+      <!-- Cargar menos -->
+      <button class="btn-cargar-mas" *ngIf="mostrandoTodos()" (click)="cargarMenos()">
+        <lucide-icon [img]="ChevronUp" size="15"></lucide-icon>
+        Mostrar menos
+      </button>
+
+      <!-- Input nuevo comentario -->
+      <div class="nuevo-comentario">
+        <input class="form-control" [(ngModel)]="nuevoComentario"
+          placeholder="Escribí un comentario..."
+          (keyup.enter)="enviarComentario()" />
+        <button class="btn-send" (click)="enviarComentario()">
+          <lucide-icon [img]="Send" size="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
