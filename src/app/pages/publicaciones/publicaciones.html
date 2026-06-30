@@ -17,6 +17,10 @@
         <lucide-icon [img]="User" size="18"></lucide-icon>
         <span>Mi Perfil</span>
       </a>
+      <a routerLink="/dashboard/usuarios" class="topbar-link"
+        *ngIf="usuarioActual?.perfil === 'administrador'">
+        ⚡ <span>Dashboard</span>
+      </a>
       <button class="topbar-logout" (click)="logout()">
         <lucide-icon [img]="LogOut" size="16"></lucide-icon>
       </button>
@@ -51,6 +55,7 @@
       *ngFor="let post of publicaciones()"
       [post]="post"
       [usuarioActualId]="usuarioActual?._id"
+      [esAdmin]="usuarioActual?.perfil === 'administrador'"
       (onLike)="toggleLike($event)"
       (onEliminar)="eliminarPost($event)"
       (oncomentar)="agregarComentario($event)">

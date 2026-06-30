@@ -149,3 +149,101 @@ La aplicación está deployada en Vercel:
 | `sprint-1` | Snapshot de entrega del Sprint 1 |
 | `sprint-2` | Snapshot de entrega del Sprint 2 |
 | `sprint-3` | Snapshot de entrega del Sprint 3 |
+
+---
+
+## Sprint 4 — Frontend
+
+### Nuevas tecnologías
+- ng2-charts + Chart.js (gráficos)
+- @angular/pwa + @angular/service-worker (PWA)
+
+### Nuevas funcionalidades implementadas
+
+#### Administrador en publicaciones
+- Si el usuario logueado es administrador, aparece el botón de eliminar en **cualquier publicación** (no solo las propias)
+- La eliminación es baja lógica — la publicación y sus comentarios dejan de estar disponibles
+
+#### Dashboard — Usuarios (solo admin)
+- Accesible desde la navbar cuando el usuario es administrador
+- Listado completo de usuarios con nombre, email, rol, fecha de registro y estado
+- Crear nuevos usuarios con el mismo formulario que el registro, con radio buttons para elegir perfil (`usuario` o `administrador`)
+- Deshabilitar usuarios (baja lógica) — el usuario no puede ingresar y es notificado al intentar el login
+- Habilitar usuarios previamente deshabilitados
+- No se puede deshabilitar al propio usuario logueado
+
+#### Dashboard — Estadísticas (solo admin)
+- Tres gráficos con tipos variados:
+  - **Torta** — cantidad de publicaciones por usuario
+  - **Línea** — cantidad de comentarios por día
+  - **Barras** — cantidad de comentarios por publicación (top 10)
+- Filtro de lapso de tiempo con fechas "Desde" y "Hasta" + botón Aplicar
+
+#### PWA
+- Progressive Web App configurada con `@angular/pwa`
+- Service worker habilitado en producción
+- Manifest con íconos y nombre de la app
+- Instalable desde el navegador en dispositivos móviles y desktop
+
+#### 3 Pipes propias
+| Pipe | Uso |
+|---|---|
+| `tiempoRelativo` | Convierte una fecha a "hace X minutos/horas/días" |
+| `truncar` | Trunca un texto con ellipsis según un límite de caracteres |
+| `iniciales` | Extrae las iniciales de un nombre completo |
+
+#### 3 Directivas propias
+| Directiva | Uso |
+|---|---|
+| `appResaltar` | Resalta el fondo del elemento al hacer hover |
+| `appAutoFocus` | Hace foco automático en el elemento al renderizarse |
+| `appSoloNumeros` | Bloquea la entrada de caracteres no numéricos en inputs |
+
+#### Nuevo guard
+- `AdminGuard` — protege las rutas `/dashboard/usuarios` y `/dashboard/estadisticas`, redirige a publicaciones si el usuario no es administrador
+
+### Estructura del proyecto (actualizada)
+```
+src/
+└── app/
+    ├── components/
+    │   └── publicacion-card/
+    ├── directivas/
+    │   └── directivas.ts
+    ├── guards/
+    │   ├── auth.guard.ts
+    │   └── admin.guard.ts
+    ├── interceptors/
+    │   └── auth.interceptor.ts
+    ├── pages/
+    │   ├── login/
+    │   ├── registro/
+    │   ├── publicaciones/
+    │   ├── publicacion-detalle/
+    │   ├── mi-perfil/
+    │   ├── dashboard-usuarios/
+    │   └── dashboard-estadisticas/
+    ├── pipes/
+    │   └── pipes.ts
+    ├── services/
+    │   ├── auth.service.ts
+    │   ├── publicaciones.service.ts
+    │   ├── usuarios.service.ts
+    │   ├── estadisticas.service.ts
+    │   └── sesion.service.ts
+    ├── environments/
+    │   ├── environment.ts
+    │   └── environment.prod.ts
+    ├── app.routes.ts
+    ├── app.config.ts
+    └── app.component.ts
+```
+
+### Ramas
+| Rama | Descripción |
+|---|---|
+| `main` | Versión actual en producción |
+| `sprint-1` | Snapshot de entrega del Sprint 1 |
+| `sprint-2` | Snapshot de entrega del Sprint 2 |
+| `sprint-3` | Snapshot de entrega del Sprint 3 |
+| `sprint-4` | Snapshot de entrega del Sprint 4 |

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -25,6 +26,16 @@ export const routes: Routes = [
     path: 'mi-perfil',
     loadComponent: () => import('./pages/mi-perfil/mi-perfil').then(m => m.MiPerfilComponent),
     canActivate: [authGuard],
+  },
+  {
+    path: 'dashboard/usuarios',
+    loadComponent: () => import('./pages/dashboard-usuarios/dashboard-usuarios').then(m => m.DashboardUsuariosComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'dashboard/estadisticas',
+    loadComponent: () => import('./pages/dashboard-estadisticas/dashboard-estadisticas').then(m => m.DashboardEstadisticasComponent),
+    canActivate: [authGuard, adminGuard],
   },
   { path: '**', redirectTo: 'login' },
 ];

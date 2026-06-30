@@ -34,6 +34,7 @@ export interface Publicacion {
 export class PublicacionCardComponent {
   @Input() post!: Publicacion;
   @Input() usuarioActualId: string = '';   // para saber si liked / esPropia
+  @Input() esAdmin: boolean = false;
   @Output() onLike = new EventEmitter<Publicacion>();
   @Output() onEliminar = new EventEmitter<Publicacion>();
   @Output() oncomentar = new EventEmitter<{ post: Publicacion; texto: string }>();
@@ -56,6 +57,10 @@ export class PublicacionCardComponent {
 
   get esPropia(): boolean {
     return this.post.autor?._id === this.usuarioActualId;
+  }
+
+  get puedeEliminar(): boolean {
+    return this.esPropia || this.esAdmin;
   }
 
   get cantidadLikes(): number {

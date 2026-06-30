@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -28,6 +28,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private sesionService: SesionService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -64,6 +65,7 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.errorMsg = err?.error?.message || 'Usuario o contraseña incorrectos';
+        this.cdr.detectChanges();
       }
     });
   }

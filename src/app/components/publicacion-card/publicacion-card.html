@@ -10,7 +10,7 @@
       <span class="post-name">{{ nombreAutor || 'Usuario' }}</span>
       <span class="post-meta">@{{ usernameAutor || '?' }} · {{ post.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
     </div>
-    <button class="btn-delete" *ngIf="esPropia" (click)="confirmarEliminar()" title="Eliminar publicación">
+    <button class="btn-delete" *ngIf="puedeEliminar" (click)="confirmarEliminar()" title="Eliminar publicación">
       <lucide-icon [img]="Trash2" size="15"></lucide-icon>
     </button>
   </div>

@@ -214,24 +214,35 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Tiempo mínimo de splash para que el cliente renderice el SVG
+    const tiempoMinimo = new Promise(resolve => setTimeout(resolve, 1200));
+
     const token = this.authService.getToken();
     if (!token) {
-      this.cargando.set(false);
-      this.router.navigate(['/login']);
+      tiempoMinimo.then(() => {
+        this.cargando.set(false);
+        this.router.navigate(['/login']);
+      });
       return;
     }
 
-    this.authService.autorizar().subscribe({
-      next: () => {
+    Promise.all([
+      tiempoMinimo,
+      this.authService.autorizar().toPromise().catch(() => null),
+    ]).then(([, resultado]: any[]) => {
+      if (resultado?.valido) {
+        // Actualizar datos del usuario en localStorage
+        if (resultado.usuario) {
+          localStorage.setItem("usuario", JSON.stringify(resultado.usuario));
+        }
         this.cargando.set(false);
         this.router.navigate(['/publicaciones']);
         this.iniciarTimer();
-      },
-      error: () => {
+      } else {
         this.authService.logout();
         this.cargando.set(false);
         this.router.navigate(['/login']);
-      },
+      }
     });
   }
 

@@ -17,6 +17,10 @@
         <lucide-icon [img]="User" size="18"></lucide-icon>
         <span>Mi Perfil</span>
       </a>
+      <a routerLink="/dashboard/usuarios" class="topbar-link"
+        *ngIf="user.perfil === 'administrador'">
+        ⚡ <span>Dashboard</span>
+      </a>
       <button class="topbar-logout" (click)="logout()">
         <lucide-icon [img]="LogOut" size="16"></lucide-icon>
       </button>
