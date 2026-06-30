@@ -1,0 +1,92 @@
+<div class="dashboard-page">
+
+  <!-- Navbar -->
+  <nav class="topbar">
+    <div class="topbar-brand" routerLink="/publicaciones">
+      <div class="topbar-logo">
+        <lucide-icon [img]="Rocket" size="18" color="white"></lucide-icon>
+      </div>
+      <span>Orbit</span>
+    </div>
+    <div class="topbar-actions">
+      <a routerLink="/publicaciones" class="topbar-link">
+        <lucide-icon [img]="Home" size="18"></lucide-icon>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/dashboard/usuarios" class="topbar-link">
+        <lucide-icon [img]="User" size="18"></lucide-icon>
+        <span>Usuarios</span>
+      </a>
+      <a routerLink="/dashboard/estadisticas" class="topbar-link active">
+        📊 <span>Estadísticas</span>
+      </a>
+      <button class="topbar-logout" (click)="logout()">
+        <lucide-icon [img]="LogOut" size="16"></lucide-icon>
+      </button>
+    </div>
+  </nav>
+
+  <div class="dashboard-body">
+
+    <!-- Header + filtros -->
+    <div class="dash-header">
+      <h2>Estadísticas</h2>
+      <div class="filtros">
+        <div class="filtro-grupo">
+          <label>Desde</label>
+          <input type="date" class="form-control form-control-sm"
+            [ngModel]="desde()" (ngModelChange)="desde.set($event)" />
+        </div>
+        <div class="filtro-grupo">
+          <label>Hasta</label>
+          <input type="date" class="form-control form-control-sm"
+            [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" />
+        </div>
+        <button class="btn-filtrar" (click)="cargarTodo()">Aplicar</button>
+      </div>
+    </div>
+
+    <div class="graficos-grid">
+
+      <!-- Gráfico 1: Torta - publicaciones por usuario -->
+      <div class="grafico-card">
+        <h3 class="grafico-titulo">Publicaciones por usuario</h3>
+        <p class="grafico-sub">Distribución de publicaciones entre usuarios</p>
+        <div class="grafico-wrap">
+          <canvas baseChart
+            [data]="chartPubData"
+            [options]="chartPubOptions"
+            type="pie">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 2: Línea - comentarios por tiempo -->
+      <div class="grafico-card">
+        <h3 class="grafico-titulo">Comentarios por día</h3>
+        <p class="grafico-sub">Evolución de comentarios en el tiempo</p>
+        <div class="grafico-wrap">
+          <canvas baseChart
+            [data]="chartComTimeData"
+            [options]="chartComTimeOptions"
+            type="line">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 3: Barras - comentarios por publicación -->
+      <div class="grafico-card grafico-full">
+        <h3 class="grafico-titulo">Comentarios por publicación</h3>
+        <p class="grafico-sub">Top 10 publicaciones con más comentarios</p>
+        <div class="grafico-wrap">
+          <canvas baseChart
+            [data]="chartComPubData"
+            [options]="chartComPubOptions"
+            type="bar">
+          </canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

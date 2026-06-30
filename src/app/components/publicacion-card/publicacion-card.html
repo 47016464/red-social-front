@@ -2,7 +2,6 @@
 
   <!-- Header -->
   <div class="post-head">
-    <!-- Avatar: foto si tiene, iniciales si no -->
     <div class="post-avatar">
       <img *ngIf="post.autor.imagenPerfil" [src]="post.autor.imagenPerfil" alt="avatar" class="avatar-img" />
       <span *ngIf="!post.autor.imagenPerfil">{{ getInitials() }}</span>
@@ -11,14 +10,13 @@
       <span class="post-name">{{ nombreAutor || 'Usuario' }}</span>
       <span class="post-meta">@{{ usernameAutor || '?' }} · {{ post.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
     </div>
-    <button class="btn-delete" *ngIf="esPropia" (click)="confirmarEliminar()"
-      title="Eliminar publicación">
+    <button class="btn-delete" *ngIf="puedeEliminar" (click)="confirmarEliminar()" title="Eliminar publicación">
       <lucide-icon [img]="Trash2" size="15"></lucide-icon>
     </button>
   </div>
 
-  <!-- Contenido -->
-  <div class="post-content">
+  <!-- Contenido clickeable → va al detalle -->
+  <div class="post-content post-clickable" [routerLink]="['/publicaciones', post._id]">
     <h3 class="post-title">{{ post.titulo }}</h3>
     <p class="post-text">{{ post.mensaje }}</p>
     <img *ngIf="post.imagen" [src]="post.imagen" class="post-img" alt="imagen" />
@@ -36,9 +34,9 @@
     </button>
   </div>
 
-  <!-- Comentarios -->
+  <!-- Comentarios (máx 3, después lleva al detalle) -->
   <div class="comments-wrap" *ngIf="post.showComments">
-    <div class="comment" *ngFor="let c of post.comentarios">
+    <div class="comment" *ngFor="let c of primeros3Comentarios">
       <div class="comment-av">
         <img *ngIf="c.autor?.imagenPerfil" [src]="c.autor.imagenPerfil" alt="avatar" class="avatar-img" />
         <span *ngIf="!c.autor?.imagenPerfil">{{ getNombreComentario(c.autor)[0] }}</span>
@@ -49,6 +47,13 @@
         <span class="comment-time">{{ c.creadoEn | date:'dd/MM HH:mm' }}</span>
       </div>
     </div>
+
+    <!-- Cargar más → lleva al detalle -->
+    <button class="btn-ver-mas-comments" *ngIf="post.comentarios.length > 3"
+      [routerLink]="['/publicaciones', post._id]">
+      Ver más comentarios ({{ post.comentarios.length - 3 }} más) →
+    </button>
+
     <div class="comment-input-row">
       <input class="form-control form-control-sm"
         [(ngModel)]="newCommentText"

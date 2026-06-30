@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Heart, MessageCircle, Send, Trash2 } from 'lucide-angular';
@@ -26,13 +27,14 @@ export interface Publicacion {
 @Component({
   selector: 'app-publicacion-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, RouterLink],
   templateUrl: './publicacion-card.html',
   styleUrl: './publicacion-card.css'
 })
 export class PublicacionCardComponent {
   @Input() post!: Publicacion;
   @Input() usuarioActualId: string = '';   // para saber si liked / esPropia
+  @Input() esAdmin: boolean = false;
   @Output() onLike = new EventEmitter<Publicacion>();
   @Output() onEliminar = new EventEmitter<Publicacion>();
   @Output() oncomentar = new EventEmitter<{ post: Publicacion; texto: string }>();
@@ -43,6 +45,10 @@ export class PublicacionCardComponent {
   readonly Trash2 = Trash2;
 
   newCommentText = '';
+
+  get primeros3Comentarios() {
+    return this.post.comentarios.slice(0, 3);
+  }
   showConfirmDelete = false;
 
   get liked(): boolean {
@@ -51,6 +57,10 @@ export class PublicacionCardComponent {
 
   get esPropia(): boolean {
     return this.post.autor?._id === this.usuarioActualId;
+  }
+
+  get puedeEliminar(): boolean {
+    return this.esPropia || this.esAdmin;
   }
 
   get cantidadLikes(): number {

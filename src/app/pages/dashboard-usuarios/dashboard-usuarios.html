@@ -1,0 +1,211 @@
+<div class="dashboard-page">
+
+  <!-- Navbar -->
+  <nav class="topbar">
+    <div class="topbar-brand" routerLink="/publicaciones">
+      <div class="topbar-logo">
+        <lucide-icon [img]="Rocket" size="18" color="white"></lucide-icon>
+      </div>
+      <span>Orbit</span>
+    </div>
+    <div class="topbar-actions">
+      <a routerLink="/publicaciones" class="topbar-link">
+        <lucide-icon [img]="Home" size="18"></lucide-icon>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/dashboard/usuarios" class="topbar-link active">
+        <lucide-icon [img]="User" size="18"></lucide-icon>
+        <span>Usuarios</span>
+      </a>
+      <a routerLink="/dashboard/estadisticas" class="topbar-link">
+        📊 <span>Estadísticas</span>
+      </a>
+      <button class="topbar-logout" (click)="logout()">
+        <lucide-icon [img]="LogOut" size="16"></lucide-icon>
+      </button>
+    </div>
+  </nav>
+
+  <div class="dashboard-body">
+
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <h2>Gestión de usuarios</h2>
+        <p class="dash-sub">{{ usuarios().length }} usuarios registrados</p>
+      </div>
+      <button class="btn-primary-action" (click)="mostrarFormulario.set(true)">
+        <lucide-icon [img]="UserPlus" size="16"></lucide-icon>
+        Nuevo usuario
+      </button>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="alert-success" *ngIf="successMsg()">{{ successMsg() }}</div>
+    <div class="alert-error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+    <!-- Tabla usuarios -->
+    <div class="tabla-card" *ngIf="!cargando()">
+      <table class="tabla-usuarios">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Registro</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usuarios()" appResaltar class="tabla-row">
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar-sm">
+                  <img *ngIf="u.imagenPerfil" [src]="u.imagenPerfil" class="avatar-img" />
+                  <span *ngIf="!u.imagenPerfil">{{ (u.nombre[0] + u.apellido[0]).toUpperCase() }}</span>
+                </div>
+                <div>
+                  <div class="user-name">{{ u.nombre }} {{ u.apellido }}</div>
+                  <div class="user-username">@{{ u.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="td-email">{{ u.email }}</td>
+            <td>
+              <span class="role-badge" [class.admin]="u.perfil === 'administrador'">
+                {{ u.perfil === 'administrador' ? '⚡ Admin' : '👤 Usuario' }}
+              </span>
+            </td>
+            <td class="td-fecha">{{ u.createdAt | tiempoRelativo }}</td>
+            <td>
+              <span class="estado-badge" [class.habilitado]="u.habilitado" [class.deshabilitado]="!u.habilitado">
+                {{ u.habilitado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="acciones">
+                <button class="btn-accion btn-habilitar" *ngIf="!u.habilitado" (click)="habilitar(u)"
+                  title="Habilitar usuario">
+                  <lucide-icon [img]="UserCheck" size="15"></lucide-icon>
+                </button>
+                <button class="btn-accion btn-deshabilitar" *ngIf="u.habilitado && u._id !== usuarioActual._id"
+                  (click)="deshabilitar(u)" title="Deshabilitar usuario">
+                  <lucide-icon [img]="UserX" size="15"></lucide-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="cargando()">
+      <div class="spinner"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal nuevo usuario -->
+<div class="modal-overlay" *ngIf="mostrarFormulario()">
+  <div class="modal-box modal-grande">
+    <div class="modal-head">
+      <h4>Nuevo usuario</h4>
+      <button class="btn-close-modal" (click)="mostrarFormulario.set(false)">
+        <lucide-icon [img]="X" size="18"></lucide-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" novalidate>
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Nombre *</label>
+          <input type="text" class="form-control" formControlName="nombre"
+            [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched" />
+          <div class="invalid-feedback">Mínimo 2 caracteres.</div>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Apellido *</label>
+          <input type="text" class="form-control" formControlName="apellido"
+            [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched" />
+          <div class="invalid-feedback">Mínimo 2 caracteres.</div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" formControlName="email"
+            [class.is-invalid]="f['email'].invalid && f['email'].touched" />
+          <div class="invalid-feedback">Email inválido.</div>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Username *</label>
+          <input type="text" class="form-control" formControlName="username"
+            [class.is-invalid]="f['username'].invalid && f['username'].touched" />
+          <div class="invalid-feedback">Mínimo 3 caracteres.</div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Contraseña *</label>
+          <input type="password" class="form-control" formControlName="password"
+            [class.is-invalid]="f['password'].invalid && f['password'].touched" />
+          <div class="invalid-feedback">Mín 8 chars, 1 mayúscula, 1 número.</div>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Repetir contraseña *</label>
+          <input type="password" class="form-control" formControlName="confirmPassword"
+            [class.is-invalid]="form.errors?.['mismatch'] && f['confirmPassword'].touched" />
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Fecha de nacimiento *</label>
+          <input type="date" class="form-control" formControlName="fechaNacimiento" />
+        </div>
+        <div class="col-6">
+          <label class="form-label">Perfil</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" formControlName="perfil" value="usuario" />
+              <span>👤 Usuario</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="perfil" value="administrador" />
+              <span>⚡ Administrador</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Foto de perfil (opcional)</label>
+        <div class="foto-upload-row">
+          <div class="foto-preview">
+            <img *ngIf="previewUrl()" [src]="previewUrl()" alt="preview" />
+            <span *ngIf="!previewUrl()">📷</span>
+          </div>
+          <input type="file" class="form-control" accept="image/*" (change)="onFileChange($event)" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="mostrarFormulario.set(false)">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="crearUsuario()" [disabled]="guardando()">
+          {{ guardando() ? 'Creando...' : 'Crear usuario' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
