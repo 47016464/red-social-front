@@ -73,7 +73,7 @@ Orbit es una red social desarrollada con Angular 17 como trabajo práctico de la
 - Botón "Ver todos los comentarios" para cargar todos de una
 - Botón "Mostrar menos" para volver a los primeros 3
 - Input para escribir nuevos comentarios
-- Edición inline de comentarios propios
+- Edición online de comentarios propios
 - Marca "(editado)" en comentarios modificados
 - Navegación desde el feed haciendo click en el contenido de la publicación
 
